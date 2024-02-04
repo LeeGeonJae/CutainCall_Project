@@ -1,0 +1,104 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="0. Configuration">
+      <UniqueIdentifier>{d71e5c2c-f3f0-485b-b284-25a1b8838f6e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="1. Core">
+      <UniqueIdentifier>{770f9644-291d-4005-8708-04b17bea6cbc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="2. World">
+      <UniqueIdentifier>{77422222-c30a-416d-8d02-27710779d36c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3. Object">
+      <UniqueIdentifier>{774a0ed4-4a62-4f59-aa32-ab98a64d3007}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="4. FSM">
+      <UniqueIdentifier>{8ac5a466-49ee-47d1-912d-9c98fe9190cb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="4. FSM\State">
+      <UniqueIdentifier>{05f6ed83-80d4-475a-a867-7dd01286dc26}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="4. FSM\State\Transition">
+      <UniqueIdentifier>{b48f7c9f-3f19-4c0c-ad9f-eb65b8c77653}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="5. Utill">
+      <UniqueIdentifier>{ca53bf32-f012-4ac6-81f1-8819f086ba6b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="GameApp.h">
+      <Filter>1. Core</Filter>
+    </ClInclude>
+    <ClInclude Include="framework.h">
+      <Filter>0. Configuration</Filter>
+    </ClInclude>
+    <ClInclude Include="TestWorld.h">
+      <Filter>2. World</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>0. Configuration</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerObject.h">
+      <Filter>3. Object</Filter>
+    </ClInclude>
+    <ClInclude Include="StaticTestObject.h">
+      <Filter>3. Object</Filter>
+    </ClInclude>
+    <ClInclude Include="TestWorld2.h">
+      <Filter>2. World</Filter>
+    </ClInclude>
+    <ClInclude Include="RunState.h">
+      <Filter>4. FSM\State</Filter>
+    </ClInclude>
+    <ClInclude Include="IdleState.h">
+      <Filter>4. FSM\State</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerTransition.h">
+      <Filter>4. FSM\State\Transition</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerFSM.h">
+      <Filter>4. FSM</Filter>
+    </ClInclude>
+    <ClInclude Include="CubeMapObject.h">
+      <Filter>3. Object</Filter>
+    </ClInclude>
+    <ClInclude Include="YAMLParser.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="GameApp.cpp">
+      <Filter>1. Core</Filter>
+    </ClCompile>
+    <ClCompile Include="TestWorld.cpp">
+      <Filter>2. World</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>0. Configuration</Filter>
+    </ClCompile>
+    <ClCompile Include="PlayerObject.cpp">
+      <Filter>3. Object</Filter>
+    </ClCompile>
+    <ClCompile Include="StaticTestObject.cpp">
+      <Filter>3. Object</Filter>
+    </ClCompile>
+    <ClCompile Include="TestWorld2.cpp">
+      <Filter>2. World</Filter>
+    </ClCompile>
+    <ClCompile Include="RunState.cpp">
+      <Filter>4. FSM\State</Filter>
+    </ClCompile>
+    <ClCompile Include="IdleState.cpp">
+      <Filter>4. FSM\State</Filter>
+    </ClCompile>
+    <ClCompile Include="PlayerTransition.cpp">
+      <Filter>4. FSM\State\Transition</Filter>
+    </ClCompile>
+    <ClCompile Include="PlayerFSM.cpp">
+      <Filter>4. FSM</Filter>
+    </ClCompile>
+    <ClCompile Include="CubeMapObject.cpp">
+      <Filter>3. Object</Filter>
+    </ClCompile>
+    <ClCompile Include="YAMLParser.cpp" />
+  </ItemGroup>
+</Project>
