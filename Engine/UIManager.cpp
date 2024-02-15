@@ -28,7 +28,7 @@ void UIManager::Update(float deltaTime)
 
 	UpdateHoveredUI(deltaTime);
 	UpdateClickedUI(deltaTime);
-	ClearFocusedUI();
+	UpdateHoverOutUI(deltaTime);
 }
 
 void UIManager::ClearFocusedUI()
@@ -44,6 +44,15 @@ void UIManager::UpdateHoveredUI(float deltaTime)
 		UI.lock()->ExecuteHoverFunctors(deltaTime);
 	}
 	m_HoveredUIObjects.clear();
+}
+
+void UIManager::UpdateHoverOutUI(float deltaTime)
+{
+	for (auto& UI : m_HoverOutUIObjects)
+	{
+		UI.lock()->ExecuteHoverOutFunctors(deltaTime);
+	}
+	m_HoverOutUIObjects.clear();
 }
 
 void UIManager::UpdateClickedUI(float deltaTime)
@@ -76,13 +85,17 @@ void UIManager::OnInputProcess(const Keyboard::State& KeyState, const Keyboard::
 			mouseY >= uiScreenY && mouseY <= uiScreenY + uiScreenHeight)
 		{
 			m_HoveredUIObjects.push_back(UI.second);
+			UI.second->SetHovered(true);
 
 			if (MouseTracker.leftButton == Mouse::ButtonStateTracker::PRESSED)
 			{
 				m_ClickedUIObjects.push_back(UI.second);
 			}
 		}
-
+		else if (UI.second->IsHovered())
+		{
+			m_HoverOutUIObjects.push_back(UI.second);
+		}
 		//Test
 		//if (KeyState.IsKeyDown(DirectX::Keyboard::Keys::H))
 		//{
@@ -93,10 +106,12 @@ void UIManager::OnInputProcess(const Keyboard::State& KeyState, const Keyboard::
 		//{
 		//	m_ClickedUIObjects.push_back(UI);
 		//}
-		
+		 
 		if (KeyState.IsKeyDown(DirectX::Keyboard::Keys::Q))
 		{
 			auto ui = m_UIObjects.find(L"TestUI");
+			if (ui == m_UIObjects.end())
+				return;
 			ui->second->GetUIInstance().lock()->NotLoopAnimationStart();
 		}
 	}

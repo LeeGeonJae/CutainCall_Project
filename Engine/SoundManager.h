@@ -8,15 +8,28 @@ class SoundManager
 public:
 	~SoundManager();
 
-	std::weak_ptr<FMOD::Sound> LoadSound(std::string filePath, FMOD_MODE mode = FMOD_DEFAULT);
+	FMOD::Sound* LoadSound(std::string filePath, FMOD_MODE mode = FMOD_DEFAULT);
 
-	void playSound(std::weak_ptr<FMOD::Sound> sound);
-	void playSound(std::string filePath);
+	void PlaySound(FMOD::Sound* sound);
+	void PlaySound(std::string filePath);
+
+	void TogglePlay(FMOD::Sound* sound);
+	void TogglePlay(std::string filePath);
+
+	void SetVolume(FMOD::Sound* sound, float volume);
+	void SetVolume(std::string filePath, float volume);
 
 	void Initailize();
+	void Update(float deltaTime);
+	void Finalize() override;
 
 private:
-	std::unique_ptr<FMOD::System> m_system;
-	std::unordered_map<std::string, std::shared_ptr<FMOD::Sound>> m_soundMap;
+	FMOD::Channel* FindChannel(FMOD::Sound* sound);
+
+	FMOD::System* m_system;
+	std::unordered_map<std::string, FMOD::Sound*> m_soundMap;
+	std::list<FMOD::Channel*> m_playingchannels;
+
+	FMOD_RESULT result;
 };
 

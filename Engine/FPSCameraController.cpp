@@ -1,16 +1,18 @@
 #include "pch.h"
 #include "FPSCameraController.h"
+
+#include "GameObject.h"
 #include "InputManager.h"
 
 void FPSCameraController::HandleInput(const Keyboard::State& KeyState, const Keyboard::KeyboardStateTracker& KeyTracker, const Mouse::State& MouseState, const Mouse::ButtonStateTracker& MouseTracker)
 {
-	auto& ownerLocalMatrix = m_owner.lock()->GetRootComponent().lock()->GetLocalTransform();
+	auto& ownerLocalMatrix = m_owner.lock()->GetTransform();
 	Math::Vector3 forward = ownerLocalMatrix.Forward();
 	Math::Vector3 right = ownerLocalMatrix.Right();
 
 	if (KeyTracker.IsKeyPressed(Keyboard::Keys::Home))
 	{
-		m_owner.lock()->GetRootComponent().lock()->SetLocalPosition(Math::Vector3::Zero);
+		m_owner.lock()->SetPosition(Math::Vector3::Zero);
 		m_pitch = 0.f;
 		m_yaw = 0.f;
 	}
@@ -57,14 +59,14 @@ void FPSCameraController::HandleInput(const Keyboard::State& KeyState, const Key
 
 void FPSCameraController::Update(float deltaTime)
 {
-	const auto& ownerRootComponent = m_owner.lock()->GetRootComponent().lock();
+	const auto& owner = m_owner.lock();
 
 	if (m_InputVector.Length() > 0.0f)
 	{
-		ownerRootComponent->SetLocalPosition(ownerRootComponent->GetLocalPosition() + (m_InputVector * m_movementSpeed * deltaTime));
+		owner->SetPosition(owner->GetPosition() + (m_InputVector * m_movementSpeed * deltaTime));
 		m_InputVector = Math::Vector3::Zero;
 	}
-	ownerRootComponent->SetLocalRotation(Math::Vector3(XMConvertToDegrees(m_pitch), XMConvertToDegrees(m_yaw), 0.0f));
+	owner->SetRotation(Math::Vector3(XMConvertToDegrees(m_pitch), XMConvertToDegrees(m_yaw), 0.0f));
 }
 
 void FPSCameraController::AddInputVector(const Math::Vector3& input)

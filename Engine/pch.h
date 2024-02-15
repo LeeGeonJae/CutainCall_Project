@@ -37,6 +37,7 @@
 #include <iostream>
 #include <functional>
 #include <concepts>
+#include <map>
 
 #include <DirectXtk/BufferHelpers.h>
 #include <directxtk/SimpleMath.h>
@@ -46,6 +47,7 @@ using namespace Microsoft::WRL;
 using namespace DirectX::SimpleMath;
 using namespace DirectX;
 namespace Math = DirectX::SimpleMath;
+
 // --------------------------------------
 
 #include "../D3DRenderer/pch.h"

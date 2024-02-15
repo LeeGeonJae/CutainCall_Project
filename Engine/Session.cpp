@@ -17,7 +17,7 @@ Session::~Session()
 {
 }
 
-void Session::Write(char* pData, int len)
+void Session::Write(char* pData, int nSent)
 {
 }
 
@@ -26,34 +26,23 @@ void Session::Read(char* pData)
 	if (m_recvBytes < 2)
 		return;
 
-	//short sizeInfo = (pData[0] - '0') * 10 + pData[1] - '0';
 	short sizeInfo;
-	sscanf_s(pData, "%2hd", &sizeInfo);
-	//memcpy(&sizeInfo, pData, 4);
+	memcpy(&sizeInfo, pData, sizeof(short));
 
-	if (sizeInfo == m_recvBytes)
+	do
 	{
-		// 완료된 스트림 버퍼를 새롭게 생성해서 memcpy 후 queue에 push
-		char* packet = new char[RCV_BUF_SIZE];
-		memcpy(packet, pData, m_recvBytes);
-		m_recvQueue.push({ packet, m_recvBytes });
-		m_recvBytes = 0;
-		printf("readBuffer: %s \n", m_recvBuffer);
-	}
-	else if (sizeInfo > m_recvBytes)
-	{
-		printf("아직이다");
-	}
-	else if (sizeInfo < m_recvBytes)
-	{
-		//todo 채원 : 여기 바꿔줍시당
 		char* packet = new char[RCV_BUF_SIZE];
 		memcpy(packet, pData, sizeInfo);
 		m_recvQueue.push({ packet, sizeInfo });
 		m_recvBytes -= sizeInfo;
 		memmove(m_recvBuffer, m_recvBuffer + sizeInfo, RCV_BUF_SIZE);
-		Read(m_recvBuffer);
-	}
+		printf("readBuffer: %s \n", m_recvBuffer);
+
+		if (m_recvBytes <= 0)
+			break;
+	} while (sizeInfo >= m_recvBytes); 
+
+	m_recvBytes = 0;
 }
 
 void Session::ReadUpdate()

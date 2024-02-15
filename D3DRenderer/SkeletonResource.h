@@ -44,4 +44,3 @@ public:
 	}
 	void CountNode(int& Count, const aiNode* pNode);
 };
-

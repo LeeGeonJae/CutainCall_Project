@@ -34,6 +34,7 @@ public:
 	~Material();
 
 	void Create(aiMaterial* pMaterial);
+	void SetTexture(MaterialMapFlags materialFlag, std::wstring texturePath);
 
 	Vector4 m_Color;
 

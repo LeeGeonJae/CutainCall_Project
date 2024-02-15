@@ -1,6 +1,12 @@
 #include "pch.h"
 #include "TestWorld.h"
 
+#include "StaticTestObject.h"
+#include "TestPlayerObject.h"
+#include "CubeMapObject.h"
+#include "BlockGenerator.h"
+#include "GridManager.h"
+
 #include "../Engine/EventManager.h"
 #include "../Engine/GameObject.h"
 #include "../Engine/CameraComponent.h"
@@ -8,33 +14,45 @@
 #include "../Engine/FPSCameraController.h"
 #include "../Engine/Model.h"
 #include "../Engine/WorldManager.h"
-
-#include <memory>
-#include <string>
-
+#include "../Engine/SoundManager.h"
 #include "../Engine/UITest.h"
-#include "../Engine/UIMouseClickTest.h"
-#include "../Engine/UIMouseClickTest1.h"
-#include "../Engine/UIMouseHoverTest.h"
-#include "../Engine/UIMouseHoverTest1.h"
 #include "../Engine/UIText.h"
-
-#include "StaticTestObject.h"
-#include "PlayerObject.h"
-#include "CubeMapObject.h"
+#include "../Engine/UITriggerPopUp.h"
+#include "../Engine/UIFunctorPopUp.h"
+#include "../Engine/UIHoverPopUpFunctor.h"
+#include "../Engine/UIClickPopUpFunctor.h"
+#include "StaticFbxObject.h"
+#include "SkeletalFbxObject.h"
+#include "UIMeshTestObject.h"
 
 #include "../NetworkLibrary/MyProtocol.h"
 #include "../D3DRenderer/UIInstance.h"
 
-void TestWorld::Initialize()
+#include <memory>
+#include <string>
+
+
+TestWorld::TestWorld()
 {
+	EventManager::GetInstance()->RegisterListener(eEventType::CHANGE_WORLD, this);
+	EventManager::GetInstance()->RegisterListener(eEventType::DELETE_OBJECT, this);
+
 	WorldManager::GetInstance()->RegisterHandler(S2C_SET_TURN, std::bind(&TestWorld::SetTurn, this, std::placeholders::_1));
 	WorldManager::GetInstance()->RegisterHandler(S2C_START_TURN, std::bind(&TestWorld::StartTurn, this, std::placeholders::_1));
 	WorldManager::GetInstance()->RegisterHandler(S2C_END_TURN, std::bind(&TestWorld::EndTurn, this, std::placeholders::_1));
 	WorldManager::GetInstance()->RegisterHandler(S2C_CHANGE_TURN, std::bind(&TestWorld::ChangeTurn, this, std::placeholders::_1));
 	WorldManager::GetInstance()->RegisterHandler(S2C_IS_ALL_READY, std::bind(&TestWorld::ClientsAllReady, this, std::placeholders::_1));
-	WorldManager::GetInstance()->RegisterHandler(S2C_CHARACTER_MOVE, std::bind(&TestWorld::PeerCharacterMove, this, std::placeholders::_1));
+	WorldManager::GetInstance()->RegisterHandler(S2C_CHARACTER_MOVE, std::bind(&TestWorld::CharacterMove, this, std::placeholders::_1));
+}
 
+TestWorld::~TestWorld()
+{
+	EventManager::GetInstance()->UnregisterListener(eEventType::CHANGE_WORLD, this);
+	EventManager::GetInstance()->UnregisterListener(eEventType::DELETE_OBJECT, this);
+}
+
+void TestWorld::Initialize()
+{
 	m_Camera = CreateGameObject<GameObject>("Test_Camera", eObjectType::CAMERA).lock();
 	auto cameraComponent = m_Camera->CreateComponent<CameraComponent>("Test_Camera_Component");
 	cameraComponent.lock()->SetLocalPosition({ 50.f, 100.f, -500.f });
@@ -42,11 +60,26 @@ void TestWorld::Initialize()
 	auto controllerComponent = m_Camera->CreateComponent<ControllerComponent>("Test_Controller_Component");
 	controllerComponent.lock()->CreateController<FPSCameraController>();
 
-	auto TestUI = m_UIManager->CreateUI<UITest, UIMouseHoverTest, UIMouseHoverTest1, UIMouseClickTest, UIMouseClickTest1>(L"TestUI");
+	auto TestPopUpUI = m_UIManager->CreateUI<UIFunctorPopUp>(L"UITestPopUp");
+	TestPopUpUI->SetTexturePath(L"../Resources/Textures/testpanel.png");
+	TestPopUpUI->SetSize({ 400.f, 400.f });
+	TestPopUpUI->SetPosition({ 0.f, 0.f });
+
+	auto PopUpFunctor = std::make_shared<UIClickPopUpFunctor>();
+	PopUpFunctor->SetTargetUI(TestPopUpUI);
+
+	auto TestUI = m_UIManager->CreateUI<UITest>(L"TestUI");
 	TestUI->SetTexturePath(L"../Resources/Textures/Snake.bmp");
 	TestUI->SetSize({ 100.f, 100.f });
 	TestUI->SetPosition({ -700.f, -300.f });
 	TestUI->SetScale({ 1.5f, 1.5f });
+	TestUI->SetMouseClickFunctor(std::move(PopUpFunctor));
+
+	auto FadeInTestUI = m_UIManager->CreateUI<UITest>(L"FadeInTestUI");
+	FadeInTestUI->SetSize({ 1920.f, 1080.f });
+	FadeInTestUI->SetPosition({ 0.f, 0.f });
+	FadeInTestUI->SetScale({ 1.0f, 1.0f });
+	m_tFadeInOut = FadeInTestUI;
 
 	auto TestTextUI1 = m_UIManager->CreateUI<UIText, void>(L"TestTextUI1");
 	TestTextUI1->SetPosition({ -50.f, 0.f });
@@ -72,41 +105,66 @@ void TestWorld::Initialize()
 	TestTextUI4->SetFontSize(30.f);
 	TestTextUI4->SetColor(D2D1::ColorF::Peru);
 	TestTextUI4->SetText(L"진짜 되네!");
-	TestUI->AddChildren(TestTextUI1, TestTextUI2, TestTextUI3, TestTextUI4);
+	TestPopUpUI->AddChildren(TestTextUI1, TestTextUI2, TestTextUI3, TestTextUI4);
 
-	//CommonApp::m_pInstance->GetRenderer()->DrawTextRequest(L"되냐?", 0.f, 0.f, D2D1::ColorF::Crimson, L"Arial", 40.f);
-	//CommonApp::m_pInstance->GetRenderer()->DrawTextRequest(L"되네!", 0.f, 60.f, D2D1::ColorF::Salmon, L"휴먼편지체", 70.f);
+	//SoundManager::GetInstance()->LoadSound("../Resources/Sound/bgm.mp3", FMOD_LOOP_NORMAL);
+	//SoundManager::GetInstance()->LoadSound("../Resources/Sound/jump.mp3");
+	//SoundManager::GetInstance()->SetVolume("../Resources/Sound/jump.mp3", 1.5f);
+	//SoundManager::GetInstance()->LoadSound("../Resources/Sound/effect.mp3");
+	//SoundManager::GetInstance()->SetVolume("../Resources/Sound/effect.mp3", 0.1f);
+	//SoundManager::GetInstance()->PlaySound("../Resources/Sound/bgm.mp3");
+	//SoundManager::GetInstance()->SetVolume("../Resources/Sound/bgm.mp3", 0.1f);
 
-	std::shared_ptr<PlayerObject> hostPlayer = CreateGameObject<PlayerObject>("HostPlayer", eObjectType::PLAYER).lock();
-	std::shared_ptr<PlayerObject> guestPlayer = CreateGameObject<PlayerObject>("GuestPlayer", eObjectType::PLAYER).lock();
+	std::shared_ptr<TestPlayerObject> hostPlayer = CreateGameObject<TestPlayerObject>("HostPlayer", eObjectType::PLAYER).lock();
+//	std::shared_ptr<TestPlayerObject> guestPlayer = CreateGameObject<TestPlayerObject>("GuestPlayer", eObjectType::PLAYER).lock();
 
-	std::shared_ptr<StaticTestObject> TestObject = CreateGameObject<StaticTestObject>("TestObject", eObjectType::TEST).lock();
-	TestObject->SetOwnerWorld(shared_from_this());
+//	std::shared_ptr<StaticTestObject> TestObject = CreateGameObject<StaticTestObject>("TestObject", eObjectType::TEST).lock();
+	std::shared_ptr<UIMeshTestObject> uiMeshObject = CreateGameObject<UIMeshTestObject>("UIMeshObject", eObjectType::TEST).lock();
 
-	if(WorldManager::GetInstance()->IsHostServer())
-		hostPlayer->SetHostPlayer();
-	else guestPlayer->SetHostPlayer();
+	//if (WorldManager::GetInstance()->IsHostServer())
+	//	hostPlayer->SetHostPlayer(true);
+	//else guestPlayer->SetHostPlayer(true);
 
+	// Test FBX Object
+	//std::shared_ptr<StaticFbxObject> fbxTest = CreateGameObject<StaticFbxObject>("FBX_TEST", eObjectType::TEST).lock();
+	//std::shared_ptr<SkeletalFbxObject> fbxBearTest = CreateGameObject<SkeletalFbxObject>("FBX_TEST", eObjectType::TEST).lock();
 
 	// CubeMap
 	CreateGameObject<CubeMapObject>("CubeMap", eObjectType::TEST);
+
+	// BlockGenerator
+	std::shared_ptr<BlockGenerator> blockGenerator = std::make_shared<BlockGenerator>(shared_from_this(), "../Resources/Map/block_test2.yaml");
+	blockGenerator->Generate();
 
 	//CommonApp::m_pInstance->GetRenderer()->SetProjectionMatrix(cameraComponent.lock()->GetProjectionMatrix());
 
 	LOG_CONTENTS("TestWorld1 Init");
 
-	char turn[1] = {'0'};
+	/*PacketC2S_SetTurn setTurn;
+	setTurn.who = '0';
 	WorldManager::GetInstance()->PushSendQueue(WorldManager::GetInstance()->SerializeBuffer(
-		sizeof(PacketC2S_SetTurn), C2S_SET_TURN, turn),
-		sizeof(PacketC2S_SetTurn));
+		sizeof(PacketC2S_SetTurn), C2S_SET_TURN, &setTurn.who),
+		sizeof(PacketC2S_SetTurn));*/
 
 	__super::Initialize();
 
+	/// --------------------------------------------
+	/// GridManager
+	m_gridManager = std::make_shared<GridManager>();
+	m_gridManager->CreateMap(10, 10, 5, 0.f, 0.f, 0.f, 100.f);
+	m_gridManager->SetMapState(GetGameObjects(eObjectType::LEVEL));
+	m_gridManager->SetMapState(GetGameObjects(eObjectType::PLAYER));
 
-	hostPlayer->GetRootComponent().lock()->SetLocalPosition({ 0.f, 0.f, 0.f });
-	guestPlayer->GetRootComponent().lock()->SetLocalPosition({ 100.f, 0.f, 0.f });
-	TestObject->GetRootComponent().lock()->SetLocalPosition({ -100.f, 0.f, 0.f });
-	TestObject->GetRootComponent().lock()->SetLocalScale({ 1.f, 1.f, 1.f });
+
+//	TestObject->GetRootComponent().lock()->SetLocalPosition({ -100.f, 0.f, 0.f });
+//	TestObject->GetRootComponent().lock()->SetLocalScale({ 1.f, 1.f, 1.f });
+
+	// 재현
+	//fbxTest->GetRootComponent().lock()->SetLocalPosition({ 150.f, 0.f, 50.f });
+	//fbxTest->GetRootComponent().lock()->SetLocalScale({ 1.f, 1.f, 1.f });
+
+	//fbxBearTest->GetRootComponent().lock()->SetLocalPosition({ -150.f, 0.f, -50.f });
+	//fbxBearTest->GetRootComponent().lock()->SetLocalScale({ 1.f, 1.f, 1.f });
 
 	// 건재 : UI 애니메이션 테스트
 	{
@@ -119,27 +177,45 @@ void TestWorld::Initialize()
 			keyframe.m_TextureSize.y = 600.f;
 			keyframe.m_Size.x = 100.f;
 			keyframe.m_Size.y = 100.f;
-			keyframe.m_AnimationTime = 0.1f;
+			keyframe.m_AnimationTime = 0.2f;
 			TestUI->GetUIInstance().lock()->SetIsLoop(false);
 			TestUI->AddKeyFrame(keyframe);
 		}
+
+		//
+		FadeInTestUI->GetUIInstance().lock()->SetIsFade();
+		FadeInTestUI->GetUIInstance().lock()->SetFadeDurationTime(1.5f);
 	}
 
 	m_bGameRun = false;
+	m_bTurn = false;
+	m_fixedDelta = 0.0f;
 }
 
 void TestWorld::Update(float deltaTime)
 {
 	World::Update(deltaTime);
 
-	/*if (GetAsyncKeyState(VK_RIGHT) & 0x8000)
-		EventManager::GetInstance()->SendEvent(eEventType::CHANGE_WORLD, this, eWorldType::TEST2);*/
+	if (GetAsyncKeyState(VK_F2) & 0x8000)
+		EventManager::GetInstance()->SendEvent(eEventType::CHANGE_WORLD, this, eWorldType::TEST2);
 
+	if (GetAsyncKeyState(VK_F3) & 0x8000)
+		EventManager::GetInstance()->SendEvent(eEventType::CHANGE_WORLD, this, eWorldType::TEST3);
 
-		// 모든 클라가 레디라면!
+	if (m_tFadeInOut != nullptr)
+	{
+		m_tFadeInOut->GetUIInstance().lock()->UpdateFadeInOut(deltaTime);
+	}
+
+	// 모든 클라가 레디라면!
 	if (m_bGameRun)
 	{
-		EventManager::GetInstance()->SendEvent(eEventType::CHANGE_WORLD, this, eWorldType::TEST2);
+		m_fixedDelta += deltaTime;
+		if (m_fixedDelta > 5.f)
+		{
+			EventManager::GetInstance()->SendEvent(eEventType::CHANGE_WORLD, this, eWorldType::TEST2);
+		}
+
 	}
 }
 
@@ -171,15 +247,6 @@ void TestWorld::StartTurn(char* pData)
 	WorldManager::GetInstance()->PushSendQueue(WorldManager::GetInstance()->SerializeBuffer(
 		sizeof(PacketC2S_BroadcastMsg), C2S_BROADCAST_MSG, broadCastTurn),
 		sizeof(PacketC2S_BroadcastMsg));
-
-	// character가 이동한 값을 받아와서 보내주긔
-	/*char* move = new char[SND_BUF_SIZE];
-	const char* msg = "100";
-	memcpy(move, msg, SND_BUF_SIZE);
-
-	WorldManager::GetInstance()->PushSendQueue(WorldManager::GetInstance()->SerializeBuffer(
-		sizeof(PacketC2S_CharacterMove), C2S_CHARACTER_MOVE, move),
-		sizeof(PacketC2S_CharacterMove));*/
 }
 
 void TestWorld::EndTurn(char* pData)
@@ -199,24 +266,36 @@ void TestWorld::ChangeTurn(char* pData)
 
 void TestWorld::ClientsAllReady(char* pData)
 {
-	m_bGameRun = pData[4] == '0' ? false : true;
+	PacketS2C_IsAllReady* pAllReady = reinterpret_cast<PacketS2C_IsAllReady*>(pData);
+	assert(pAllReady != nullptr);
+
+	m_bGameRun = pAllReady->isReady == '0' ? false : true;
+
+	if (m_bGameRun)
+	{
+		auto ui = m_UIManager->GetUIObject<UITriggerPopUp>(L"UITestPopUp");
+		//ui.lock()->TriggerPop();
+	}
 	delete[] pData;
 }
 
-void TestWorld::PeerCharacterMove(char* pData)
+void TestWorld::CharacterMove(char* pData)
 {
+	PacketS2C_CharacterMove* pCharacterMove = reinterpret_cast<PacketS2C_CharacterMove*>(pData);
+	assert(pCharacterMove != nullptr);
+
 	for (auto& object : m_gameObjects[static_cast<int>(eObjectType::PLAYER)])
 	{
-		std::shared_ptr<PlayerObject> pObj = std::dynamic_pointer_cast<PlayerObject>(object);
+		std::shared_ptr<TestPlayerObject> pObj = std::dynamic_pointer_cast<TestPlayerObject>(object);
 		if (pObj != nullptr)
 		{
 			// 호스트 서버에서 플레이어가 움직였다
-			if (pData[4] == '0')
+			if (pCharacterMove->who == '0')
 			{
 				if (WorldManager::GetInstance()->IsHostServer() && pObj->IsHostPlayer())
 				{
 					// z축 이동
-					if (pData[5] == '0')
+					if (pCharacterMove->direction == '0')
 					{
 						Math::Vector3 pos = pObj->GetRootComponent().lock()->GetLocalPosition();
 						pObj->GetRootComponent().lock()->SetLocalPosition({ pos.x, pos.y, pos.z + 50.f });
@@ -225,7 +304,7 @@ void TestWorld::PeerCharacterMove(char* pData)
 				else if (!WorldManager::GetInstance()->IsHostServer() && !pObj->IsHostPlayer())
 				{
 					// z축 이동
-					if (pData[5] == '0')
+					if (pCharacterMove->direction == '0')
 					{
 						Math::Vector3 pos = pObj->GetRootComponent().lock()->GetLocalPosition();
 						pObj->GetRootComponent().lock()->SetLocalPosition({ pos.x, pos.y, pos.z + 50.f });
@@ -238,7 +317,7 @@ void TestWorld::PeerCharacterMove(char* pData)
 				if (!WorldManager::GetInstance()->IsHostServer() && pObj->IsHostPlayer())
 				{
 					// z축 이동
-					if (pData[5] == '0')
+					if (pCharacterMove->direction == '0')
 					{
 						Math::Vector3 pos = pObj->GetRootComponent().lock()->GetLocalPosition();
 						pObj->GetRootComponent().lock()->SetLocalPosition({ pos.x, pos.y, pos.z + 50.f });
@@ -247,7 +326,7 @@ void TestWorld::PeerCharacterMove(char* pData)
 				else if (WorldManager::GetInstance()->IsHostServer() && !pObj->IsHostPlayer())
 				{
 					// z축 이동
-					if (pData[5] == '0')
+					if (pCharacterMove->direction == '0')
 					{
 						Math::Vector3 pos = pObj->GetRootComponent().lock()->GetLocalPosition();
 						pObj->GetRootComponent().lock()->SetLocalPosition({ pos.x, pos.y, pos.z + 50.f });
@@ -257,6 +336,16 @@ void TestWorld::PeerCharacterMove(char* pData)
 		}
 	}
 	delete[] pData;
+}
+
+void TestWorld::MovePlayer(TestPlayerObject* player, Vector3 vec)
+{
+	m_gridManager->MoveOnGrid(player, vec);
+}
+
+bool TestWorld::IsGround(Vector3 pos)
+{
+	return m_gridManager->IsGround(pos);
 }
 
 void TestWorld::OnEnter()
@@ -298,7 +387,7 @@ void TestWorld::OnInputProcess(const Keyboard::State& KeyState, const Keyboard::
 		if (KeyTracker.IsKeyPressed(DirectX::Keyboard::Keys::Up))
 		{
 			CreateGameObjectRuntime<StaticTestObject>("StaticMesh", eObjectType::PLAYER);
-			CreateGameObjectRuntime<PlayerObject>("SkeletalMesh", eObjectType::PLAYER);
+			CreateGameObjectRuntime<TestPlayerObject>("SkeletalMesh", eObjectType::PLAYER);
 		}
 		if (KeyTracker.IsKeyPressed(DirectX::Keyboard::Keys::Down))
 		{
@@ -316,45 +405,47 @@ void TestWorld::OnInputProcess(const Keyboard::State& KeyState, const Keyboard::
 		}
 	}
 
+	// 재현 : 페이드 인 아웃 테스트
+	if (KeyTracker.IsKeyPressed(DirectX::Keyboard::Keys::Z))
+	{
+		m_tFadeInOut->GetUIInstance().lock()->FadeOutStart();
+	}
+	if (KeyTracker.IsKeyPressed(DirectX::Keyboard::Keys::X))
+	{
+		m_tFadeInOut->GetUIInstance().lock()->FadeInStart();
+	}
+
 	if (KeyTracker.IsKeyPressed(DirectX::Keyboard::Keys::Delete))
 	{
 		// 준비 버튼
-		char msg[1] = { '1' };
+		PacketC2S_READY ready;
+		ready.clickedReady = '1';
 
 		WorldManager::GetInstance()->PushSendQueue(
-			WorldManager::GetInstance()->SerializeBuffer(sizeof(PacketC2S_READY), C2S_READY, msg),
+			WorldManager::GetInstance()->SerializeBuffer(sizeof(PacketC2S_READY), C2S_READY, &ready.clickedReady),
 			sizeof(PacketC2S_READY));
 	}
 
-	if (KeyTracker.IsKeyPressed(DirectX::Keyboard::O))
+	if (KeyTracker.IsKeyPressed(DirectX::Keyboard::Keys::Space))
 	{
-		Math::Vector3 xyz;
-		for (auto& object : m_gameObjects[static_cast<int>(eObjectType::PLAYER)])
-		{
-			std::shared_ptr<PlayerObject> pObj = std::dynamic_pointer_cast<PlayerObject>(object);
-			if (pObj != nullptr)
-			{
-				if (pObj->IsHostPlayer())
-				{
-					xyz = pObj->GetRootComponent().lock()->GetLocalPosition();
-
-					if (WorldManager::GetInstance()->IsHostServer())
-					{
-						// todo 채원 : 고쳐
-						char msg[2] = { '0', '0' };
-						WorldManager::GetInstance()->PushSendQueue(WorldManager::GetInstance()->SerializeBuffer(
-							sizeof(PacketC2S_CharacterMove), C2S_CHARACTER_MOVE, msg),
-							sizeof(PacketC2S_CharacterMove));
-					}
-					else
-					{
-						char msg[2] = { '1', '0' };
-						WorldManager::GetInstance()->PushSendQueue(WorldManager::GetInstance()->SerializeBuffer(
-							sizeof(PacketC2S_CharacterMove), C2S_CHARACTER_MOVE, msg),
-							sizeof(PacketC2S_CharacterMove));
-					}
-				}
-			}
-		}
+		SoundManager::GetInstance()->PlaySound("../Resources/Sound/jump.mp3");
 	}
+
+	if (KeyTracker.IsKeyPressed(DirectX::Keyboard::Keys::V))
+	{
+		SoundManager::GetInstance()->PlaySound("../Resources/Sound/effect.mp3");
+	}
+
+	if (KeyTracker.IsKeyPressed(DirectX::Keyboard::Keys::B))				// 머터리얼 바뀌는 거 테스트용 코드
+	{
+		weak_ptr<UIMeshTestObject> object = dynamic_pointer_cast<UIMeshTestObject>(GetGameObject("UIMeshObject"));
+		object.lock()->ChangedMaterial();
+	}
+	if (KeyTracker.IsKeyPressed(DirectX::Keyboard::Keys::N))				// 머터리얼 바뀌는 거 테스트용 코드
+	{
+		weak_ptr<UIMeshTestObject> object = dynamic_pointer_cast<UIMeshTestObject>(GetGameObject("UIMeshObject"));
+		object.lock()->PlayParticle();
+		object.lock()->ChangedUIMaterial();
+	}
+
 }

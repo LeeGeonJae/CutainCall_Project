@@ -84,6 +84,59 @@ void Material::Create(aiMaterial* pMaterial)
 	}
 }
 
+void Material::SetTexture(MaterialMapFlags materialFlag, std::wstring texturePath)
+{
+	if (materialFlag & MaterialMapFlags::BASECOLOR)
+	{
+		m_pDiffuseRV = ResourceManager::GetInstance()->CreateMaterialTexture(texturePath);
+
+		if (!(m_MaterialMapFlags & MaterialMapFlags::BASECOLOR))
+			m_MaterialMapFlags |= MaterialMapFlags::BASECOLOR;
+	}
+	else if (materialFlag & MaterialMapFlags::NORMAL)
+	{
+		m_pNormalRV = ResourceManager::GetInstance()->CreateMaterialTexture(texturePath);
+
+		if (!(m_MaterialMapFlags & MaterialMapFlags::NORMAL))
+			m_MaterialMapFlags |= MaterialMapFlags::NORMAL;
+	}
+	else if (materialFlag & MaterialMapFlags::SPECULAR)
+	{
+		m_pSpecularRV = ResourceManager::GetInstance()->CreateMaterialTexture(texturePath);
+
+		if (!(m_MaterialMapFlags & MaterialMapFlags::SPECULAR))
+			m_MaterialMapFlags |= MaterialMapFlags::SPECULAR;
+	}
+	else if (materialFlag & MaterialMapFlags::EMISSIVE)
+	{
+		m_pEmissiveRV = ResourceManager::GetInstance()->CreateMaterialTexture(texturePath);
+
+		if (!(m_MaterialMapFlags & MaterialMapFlags::EMISSIVE))
+			m_MaterialMapFlags |= MaterialMapFlags::EMISSIVE;
+	}
+	else if (materialFlag & MaterialMapFlags::OPACITY)
+	{
+		m_pOpacityRV = ResourceManager::GetInstance()->CreateMaterialTexture(texturePath);
+
+		if (!(m_MaterialMapFlags & MaterialMapFlags::OPACITY))
+			m_MaterialMapFlags |= MaterialMapFlags::OPACITY;
+	}
+	else if (materialFlag & MaterialMapFlags::METALNESS)
+	{
+		m_pMetalnessRV = ResourceManager::GetInstance()->CreateMaterialTexture(texturePath);
+
+		if (!(m_MaterialMapFlags & MaterialMapFlags::METALNESS))
+			m_MaterialMapFlags |= MaterialMapFlags::METALNESS;
+	}
+	else if (materialFlag & MaterialMapFlags::ROUGHNESS)
+	{
+		m_pRoughnessRV = ResourceManager::GetInstance()->CreateMaterialTexture(texturePath);
+
+		if (!(m_MaterialMapFlags & MaterialMapFlags::ROUGHNESS))
+			m_MaterialMapFlags |= MaterialMapFlags::ROUGHNESS;
+	}
+}
+
 MaterialTexture::MaterialTexture()
 {
 }

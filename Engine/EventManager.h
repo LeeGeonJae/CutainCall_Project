@@ -13,8 +13,19 @@ enum class eEventType
 	CHANGE_WORLD,
 	DELETE_OBJECT,
 
-	TRANSPER_MOVEMENT,
+	// PlayerObject > Transition 전달 정보
+	CHANGE_TURN,
+	GET_THIS_ACTION,
+	CHECK_GROUND,
+	CHECK_CRASH,
+	CHECK_GET_ITEM,
+
+	// State > SkeletalMeshComponent 전달 정보
 	CHANGE_ANIMATION,
+
+	MOVE_ON_GRID,
+	CRASH_ON_GRID,
+
 	END
 };
 

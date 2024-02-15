@@ -37,7 +37,7 @@ public:
 	bool IsRecvQueueEmpty() { return m_recvQueue.empty(); }
 	bool IsSendQueueEmpty() { return m_sendQueue.empty(); }
 
-	char* SerializeBuffer(int size, EPacketId id, char* msg);
+	char* SerializeBuffer(short size, EPacketId id, char* msg);
 	void DeSerializeBuffer(PacketHeader& packet, char* buf);
 
 	void RegisterHandler(EPacketId packetID, PacketHandler handler) { m_handlers[packetID] = handler; }

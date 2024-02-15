@@ -19,6 +19,7 @@
 #include <dwrite.h>
 #include <DirectXColors.h>
 
+#include <vector>
 #include <list>
 #include <DirectXtk/BufferHelpers.h>
 #include <directxtk/SimpleMath.h>
@@ -43,4 +44,16 @@ constexpr int RCV_BUF_SIZE = 9604;
 	file = file.substr(file.find_last_of("/\\") + 1);\
 	printf("[Contents] FILE : %s, LINE : %d\n[Contents] MESSAGE : %s\n\n", file.c_str(), __LINE__, message);\
 }
+
+namespace grid
+{
+	constexpr Vector3 X_UP = { 1, 0, 0 };
+	constexpr Vector3 X_DOWN = { -1, 0, 0 };
+	constexpr Vector3 Y_UP = { 0, 1, 0 };
+	constexpr Vector3 Y_DOWN = { 0, -1, 0 };
+	constexpr Vector3 Z_UP = { 0, 0, 1 };
+	constexpr Vector3 Z_DOWN = { 0, 0, -1 };
+	constexpr Vector3 STAY = { 0,0,0 };
+}
+
 #endif

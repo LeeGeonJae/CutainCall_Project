@@ -30,6 +30,11 @@ void SkeletalMeshInstance::Create(Mesh* pMeshResource, Bone* pRootNode, Material
 	m_pNodeWorldTransform = &pRootNode->m_worldTransform;
 }
 
+void SkeletalMeshInstance::BindingMaterial(Material* pMaterial)
+{
+	m_pMaterial = pMaterial;
+}
+
 void SkeletalMeshInstance::UpdateMatrixPallete(Math::Matrix* MatrixPalettePtr)
 {
 	assert(m_BoneReferences.size() == m_pMeshResource->m_BoneReferences.size());
@@ -43,6 +48,7 @@ void SkeletalMeshInstance::UpdateMatrixPallete(Math::Matrix* MatrixPalettePtr)
 		MatrixPalettePtr[br.BoneIndex] = (br.OffsetMatrix * BoneNodeWorldMatrix).Transpose();
 	}
 }
+
 void SkeletalMeshInstance::Render(ID3D11DeviceContext* deviceContext)
 {
 	deviceContext->IASetIndexBuffer(m_pMeshResource->m_pIndexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);

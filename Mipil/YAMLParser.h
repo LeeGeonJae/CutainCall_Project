@@ -1,40 +1,7 @@
 #pragma once
 
-constexpr float blockDefaultScale = 100;
-
-// 오브젝트 Block을 위한 POD
-struct Block
-{
-    std::string blockType;
-    struct Position
-    {
-        float x;
-        float y;
-        float z;
-    } position;
-    struct Rotation
-    {
-        float x;
-        float y;
-        float z;
-    } rotation;
-    struct Scale
-    {
-        float x = blockDefaultScale;
-        float y = blockDefaultScale;
-        float z = blockDefaultScale;
-    } scale;
-    //m_LocalEulerAnglesHint.z
-};
-
-enum class eBlockType
-{
-	ONE,
-    TWO,
-    THREE,
-
-    END
-};
+struct BlockPOD;
+enum class eBlockType;
 
 // 밖에서는 파일 읽어오고
 // 블록 제너레이터 동작시킴
@@ -47,10 +14,12 @@ enum class eBlockType
 class YAMLParser
 {
 public:
-	void LoadFile(std::string_view filePath);
+	YAMLParser() = default;
+	~YAMLParser() = default;
+
+	void ReadBlockPOD(std::string_view filePath, std::vector<std::shared_ptr<BlockPOD>>& blockPODs);
 
 private:
-	std::string m_filePath;
-    std::vector<Block*> m_blockTransforms[static_cast<int>(eBlockType::END)];
+	eBlockType GetBlockType(std::string_view blockName);
 };
 

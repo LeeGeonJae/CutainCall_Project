@@ -12,6 +12,10 @@ enum class eWorldType
 {
 	TEST,
 	TEST2,
+	TEST3,
+	MAIN,
+	ENTER_ACTION,
+	STAGE1,
 
 	END
 };
@@ -35,8 +39,7 @@ public:
 
 public:
 	// GetGameObjects를 통해 얻은 벡터를 멤버변수 등으로 사용하여 객체 생명에 혼동을 주면 안된다.
-	// 사용 용도 등을 보고 후에 구현
-	// std::vector<std::weak_ptr<GameObject>>& GetGameObjects(eObjectType type) const;
+	std::vector<std::shared_ptr<GameObject>>& GetGameObjects(eObjectType type) { return m_gameObjects[static_cast<int>(type)]; }
 	std::shared_ptr<GameObject> GetGameObject(std::string_view name);
 	std::string GetName() const { return m_name; }
 

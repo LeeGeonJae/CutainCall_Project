@@ -25,13 +25,13 @@ public:
 	bool GetReadyState() { return m_bReady; }
 	void SetReadyState(bool ready) { m_bReady = ready; }
 
+	bool GetEndState() { return m_bTurnEnd; }
+	void SetEndState(bool end) { m_bTurnEnd = end; }
+
 	SessionId GetSessionId() { return m_sessionId; }
 
 	bool PopRecvQueue(std::pair<char*, int>& value) { return m_recvQueue.try_pop(value); }
-	bool PopSendQueue(std::pair<char*, int>& value) 
-	{ 
-		return m_sendQueue.try_pop(value);
-	}
+	bool PopSendQueue(std::pair<char*, int>& value) { return m_sendQueue.try_pop(value); }
 
 	void PushSendQueue(char* c, int len) { m_sendQueue.push({ c, len }); }
 	void PushRecvQueue(char* c, int len) { m_recvQueue.push({ c, len }); }
@@ -63,6 +63,7 @@ private:
 
 	bool m_bHost = false;
 	bool m_bReady = false;
+	bool m_bTurnEnd = false;
 
 	std::string m_NickName = {};
 };

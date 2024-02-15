@@ -78,7 +78,7 @@ void Shader::CreateVS_IL()
 		SAFE_RELEASE(vertexShaderBuffer);
 	}
 	// 건재 : 그림자 스켈레탈 버텍스 쉐이더
-	if (m_ShaderType == eShaderType::SKELETAL_SHADOW_SHADER)
+	else if (m_ShaderType == eShaderType::SKELETAL_SHADOW_SHADER)
 	{
 		D3D_SHADER_MACRO defines[] =
 		{
@@ -168,6 +168,33 @@ void Shader::CreateVS_IL()
 			vertexShaderBuffer->GetBufferSize(), NULL, m_pVertexShader.GetAddressOf()));
 		SAFE_RELEASE(vertexShaderBuffer);
 	}
+	else if (m_ShaderType == eShaderType::UI_MESH_SHADER)
+	{
+		D3D_SHADER_MACRO defines[] =
+		{
+			{"VERTEX_SKINNING",""}, // 매크로 이름과 값을 설정
+			{nullptr, nullptr}    // 배열의 끝을 나타내기 위해 nullptr로 끝낸다.
+		};
+
+		D3D11_INPUT_ELEMENT_DESC layout[] =
+		{
+			{ "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "UV", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "BLENDINDICES", 0, DXGI_FORMAT_R32G32B32A32_SINT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "BLENDWEIGHT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		};
+
+		ID3D10Blob* vertexShaderBuffer = nullptr;	// 정점 셰이더 코드가 저장될 버퍼.
+		HR_T(CompileShaderFromFile(L"../Shader/BasicVertexShader.hlsl", "main", "vs_5_0", &vertexShaderBuffer, defines));
+		HR_T(D3DRenderManager::m_pDevice->CreateInputLayout(layout, ARRAYSIZE(layout),
+			vertexShaderBuffer->GetBufferPointer(), vertexShaderBuffer->GetBufferSize(), m_pInputLayout.GetAddressOf()));
+
+		HR_T(D3DRenderManager::m_pDevice->CreateVertexShader(vertexShaderBuffer->GetBufferPointer(),
+			vertexShaderBuffer->GetBufferSize(), NULL, m_pVertexShader.GetAddressOf()));
+		SAFE_RELEASE(vertexShaderBuffer);
+	}
 }
 
 void Shader::CreatePS()
@@ -207,6 +234,13 @@ void Shader::CreatePS()
 	{
 		ComPtr<ID3D10Blob> buffer = nullptr;
 		HR_T(CompileShaderFromFile(L"../Shader/UIPixelShader.hlsl", "main", "ps_5_0", buffer.GetAddressOf(), nullptr));
+		HR_T(D3DRenderManager::m_pDevice->CreatePixelShader(buffer->GetBufferPointer(), buffer->GetBufferSize(), NULL, m_pPixelShader.GetAddressOf()));
+	}
+	// 건재 : UI 픽셀 쉐이더
+	else if (m_ShaderType == eShaderType::UI_MESH_SHADER)
+	{
+		ComPtr<ID3D10Blob> buffer = nullptr;
+		HR_T(CompileShaderFromFile(L"../Shader/UIMeshPixelShader.hlsl", "main", "ps_5_0", buffer.GetAddressOf(), nullptr));
 		HR_T(D3DRenderManager::m_pDevice->CreatePixelShader(buffer->GetBufferPointer(), buffer->GetBufferSize(), NULL, m_pPixelShader.GetAddressOf()));
 	}
 }

@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <wrl/client.h>
 #include <string>
+#include <wrl.h>
+#include <Windows.h>
 
 #define LOG_ERROR(...) \
 { \
@@ -115,3 +117,5 @@ HRESULT CreateTextureFromFile(ID3D11Device* d3dDevice, const wchar_t* szFileName
 //--------------------------------------------------------------------------------------
 
 HRESULT CompileShaderFromFile(const WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut, const D3D_SHADER_MACRO* pDefines);
+
+Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> CreateRandomTexture1DSRV(ID3D11Device* device);

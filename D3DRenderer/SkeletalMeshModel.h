@@ -12,17 +12,19 @@ public:
 	SkeletalMeshModel();
 	~SkeletalMeshModel();
 
-
+public:
 	Material* GetMaterial(UINT index);
 	double GetAnimationDuration(int animationIdx);
 	void SetWorldMatrix(Math::Matrix* worldMatrix) { m_worldMatrix = worldMatrix; }
 	void SetAnimationTime(float* progressTime) { m_pAnimationProgressTime = progressTime; }
+	void SetInstanceMaterial(Material* material, int instanceNumber);
 
 	bool ReadSceneResourceFromFBX(std::string filePath);
 	bool AddSceneAnimationFromFBX(std::string filePath);
 	void PlayAnimation(UINT index);
 	void UpdateBoneNode(float deltaTime);
 	void ChangeBoneAnimationReference(UINT index);
+	void SettingBindposeMatrix();
 
 private:
 	void SetSceneResource(std::shared_ptr<ModelResource> val);

@@ -9,7 +9,7 @@
 
 /// <summary>
 /// 소켓의 최상위단
-/// 소켓의 상태를 이곳에서 관리해준다.
+/// 소켓의 이벤트를 이곳에서 관리해준다.
 /// </summary>
 
 class WinSock
@@ -35,7 +35,7 @@ public:
 
 	bool Accept(WinSock& acceptSocket);
 
-	bool Connect(const char* ip, int port);
+	int Connect(const char* ip, int port);
 
 	bool DisConnect();
 
@@ -57,10 +57,7 @@ public:
 	void Attach(SOCKET hSocket) { m_hSocket = hSocket; }
 	void Detach() { m_hSocket = INVALID_SOCKET; }
 
-	const std::string& GetIP() 
-	{ 
-		return m_ip; 
-	}
+	const std::string& GetIP() { return m_ip; }
 	int GetPort() { return m_port; }
 
 	int GetLastError() { return m_error; }

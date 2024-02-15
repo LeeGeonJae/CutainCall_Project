@@ -11,7 +11,7 @@ StaticMeshComponent::~StaticMeshComponent()
 
 void StaticMeshComponent::Initialize()
 {
-	assert(!m_filePath.empty());
+	//assert(!m_filePath.empty());
 
 	m_staticMeshModel = std::make_shared<StaticMeshModel>();
 	m_staticMeshModel->SetWorldMatrix(&m_worldMatrix);

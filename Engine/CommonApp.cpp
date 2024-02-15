@@ -6,6 +6,8 @@
 
 #include "InputManager.h"
 #include "WorldManager.h"
+#include "SoundManager.h"
+#include "PhysicsManager.h"
 
 #include "../D3DRenderer/D3DRenderManager.h"
 #include "../NetworkLibrary/MyProtocol.h"
@@ -92,7 +94,9 @@ bool CommonApp::Initialize()
     m_client.Start(m_ip.c_str());
 
     m_pTimeManager = std::make_unique<TimeManager>();
+    PhysicsManager::GetInstance()->Initailize();
     InputManager::GetInstance()->Initialize();
+    SoundManager::GetInstance()->Initailize();
 
     return true;
 }
@@ -113,7 +117,7 @@ void CommonApp::Run()
 
         m_client.Stop();
         m_server.Stop();
-        
+
         if (ServerThread.joinable())
             ServerThread.join();
 
@@ -161,7 +165,10 @@ void CommonApp::Update()
 {
     m_pTimeManager->Update();
     m_deltaTime = m_pTimeManager->GetDeltaTime();
+
+    PhysicsManager::GetInstance()->Update(m_deltaTime);
     InputManager::GetInstance()->Update(m_deltaTime);
+    SoundManager::GetInstance()->Update(m_deltaTime);
 
     m_pD3DRenderer->Update(m_deltaTime);
 
@@ -178,7 +185,9 @@ void CommonApp::Render()
 
 void CommonApp::Finalize()
 {
+    PhysicsManager::GetInstance()->Finalize();
     InputManager::GetInstance()->Finalize();
+    SoundManager::GetInstance()->Finalize();
     UIFunctorFactory::GetInstance()->Finalize();
 }
 

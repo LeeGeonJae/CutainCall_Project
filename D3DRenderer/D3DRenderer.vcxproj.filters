@@ -46,9 +46,6 @@
     <Filter Include="02. Resource\Shader">
       <UniqueIdentifier>{320a8f09-7a36-491d-84f8-369cd2bc1897}</UniqueIdentifier>
     </Filter>
-    <Filter Include="98. DebugDraw">
-      <UniqueIdentifier>{0c150634-4151-4905-ba41-4859531cd8c9}</UniqueIdentifier>
-    </Filter>
     <Filter Include="02. Resource\Texture">
       <UniqueIdentifier>{5bdab84e-23ad-4d77-9044-b5be14235027}</UniqueIdentifier>
     </Filter>
@@ -67,6 +64,15 @@
     <Filter Include="01. Manager\D3DRendererManager\TextRenderer">
       <UniqueIdentifier>{23ba3c82-46e0-4b97-9099-c7938121359b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="02. Resource\ParticleShader">
+      <UniqueIdentifier>{e8b0028e-804e-4f19-9d99-e4ab9b398c54}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="97. DebugDraw">
+      <UniqueIdentifier>{0c150634-4151-4905-ba41-4859531cd8c9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="98. ParticleShader">
+      <UniqueIdentifier>{fe496552-1d49-474c-be0f-5549024b2488}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -78,7 +84,6 @@
     <ClInclude Include="Helper.h">
       <Filter>00. pch</Filter>
     </ClInclude>
-    <ClInclude Include="EnvironmentModel.h" />
     <ClInclude Include="Bone.h">
       <Filter>02. Resource\Bone</Filter>
     </ClInclude>
@@ -107,7 +112,7 @@
       <Filter>02. Resource\Shader</Filter>
     </ClInclude>
     <ClInclude Include="DebugDraw.h">
-      <Filter>98. DebugDraw</Filter>
+      <Filter>97. DebugDraw</Filter>
     </ClInclude>
     <ClInclude Include="Texture.h">
       <Filter>02. Resource\Texture</Filter>
@@ -143,6 +148,15 @@
     <ClInclude Include="D3DRenderManager.h">
       <Filter>01. Manager\D3DRendererManager</Filter>
     </ClInclude>
+    <ClInclude Include="ParticleShader.h">
+      <Filter>02. Resource\ParticleShader</Filter>
+    </ClInclude>
+    <ClInclude Include="ParticleSystem.h">
+      <Filter>03. Instance</Filter>
+    </ClInclude>
+    <ClInclude Include="EnvironmentModel.h">
+      <Filter>04. Model</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -151,7 +165,6 @@
     <ClCompile Include="Helper.cpp">
       <Filter>00. pch</Filter>
     </ClCompile>
-    <ClCompile Include="EnvironmentModel.cpp" />
     <ClCompile Include="Bone.cpp">
       <Filter>02. Resource\Bone</Filter>
     </ClCompile>
@@ -183,7 +196,7 @@
       <Filter>02. Resource\Shader</Filter>
     </ClCompile>
     <ClCompile Include="DebugDraw.cpp">
-      <Filter>98. DebugDraw</Filter>
+      <Filter>97. DebugDraw</Filter>
     </ClCompile>
     <ClCompile Include="Texture.cpp">
       <Filter>02. Resource\Texture</Filter>
@@ -216,6 +229,15 @@
     <ClCompile Include="TextRenderer.cpp">
       <Filter>01. Manager\D3DRendererManager\TextRenderer</Filter>
     </ClCompile>
+    <ClCompile Include="ParticleShader.cpp">
+      <Filter>02. Resource\ParticleShader</Filter>
+    </ClCompile>
+    <ClCompile Include="ParticleSystem.cpp">
+      <Filter>03. Instance</Filter>
+    </ClCompile>
+    <ClCompile Include="EnvironmentModel.cpp">
+      <Filter>04. Model</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Shader\BasicPixelShader.hlsl">
@@ -230,9 +252,6 @@
     <FxCompile Include="..\Shader\UIVertexShader.hlsl">
       <Filter>99. Shader</Filter>
     </FxCompile>
-    <FxCompile Include="..\Shader\UIPixelShader.hlsl">
-      <Filter>99. Shader</Filter>
-    </FxCompile>
     <FxCompile Include="..\Shader\SkeletalMeshShadowShader.hlsl">
       <Filter>99. Shader</Filter>
     </FxCompile>
@@ -244,6 +263,30 @@
     </FxCompile>
     <FxCompile Include="..\Shader\VS_Environment.hlsl">
       <Filter>99. Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Outline_VS.hlsl">
+      <Filter>99. Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Outline_PS.hlsl">
+      <Filter>99. Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Shader\Fire.hlsl">
+      <Filter>98. ParticleShader</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Shader\UIPixelShader.hlsl">
+      <Filter>99. Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Shader\UIMeshPixelShader.hlsl">
+      <Filter>99. Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Shader\ShockStar.hlsl">
+      <Filter>98. ParticleShader</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Shader\Smoke.hlsl">
+      <Filter>98. ParticleShader</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Shader\Sparkle.hlsl">
+      <Filter>98. ParticleShader</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

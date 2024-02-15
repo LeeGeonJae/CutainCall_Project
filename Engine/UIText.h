@@ -9,7 +9,6 @@ public:
 		, m_color(D2D1::ColorF::Black)
 		, m_fontSize(10.f)
 	{
-		m_bVisible = false;
 	};
 
 	void SetText(std::wstring_view text) { m_text = text; }

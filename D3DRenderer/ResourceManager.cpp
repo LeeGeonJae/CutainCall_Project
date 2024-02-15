@@ -10,12 +10,34 @@
 
 ResourceManager* ResourceManager::Instance = nullptr;
 
+std::shared_ptr<Material> ResourceManager::CreateMaterial(std::string key)
+{
+	auto it = m_MaterialMap.find(key);
+	if (it != m_MaterialMap.end())
+	{
+		shared_ptr<Material> resourcePtr = it->second;
+		if (resourcePtr)
+		{
+			return resourcePtr;
+		}
+		else
+		{
+			m_MaterialMap.erase(it);
+		}
+	}
+
+	shared_ptr<Material> material = make_shared<Material>();
+	m_MaterialMap[key] = material;
+
+	return material;
+}
+
 std::shared_ptr<MaterialTexture> ResourceManager::CreateMaterialTexture(std::wstring filePath)
 {
 	auto it = m_MaterialTextureMap.find(filePath);
 	if (it != m_MaterialTextureMap.end())
 	{
-		std::shared_ptr<MaterialTexture> resourcePtr = it->second.lock();
+		std::shared_ptr<MaterialTexture> resourcePtr = it->second;
 		if (resourcePtr)  //UseCount가 1이상이라 메모리가 아직 살아있다면 resourcePtr를 리턴한다.
 		{
 			return resourcePtr;
@@ -155,6 +177,29 @@ std::shared_ptr<Shader> ResourceManager::CreateShaderResource(std::string key, e
 	m_ShaderMap[key] = shader;
 
 	return shader;
+}
+
+std::shared_ptr<ParticleShader> ResourceManager::CreateParticleShader(std::wstring key, eParticleType type)
+{
+	auto it = m_ParticleShaderMap.find(key);
+	if (it != m_ParticleShaderMap.end())
+	{
+		std::shared_ptr<ParticleShader> resourcePtr = it->second;
+		if (resourcePtr)
+		{
+			return resourcePtr;
+		}
+		else
+		{
+			m_ParticleShaderMap.erase(it);
+		}
+	}
+
+	shared_ptr<ParticleShader> particleShader = make_shared<ParticleShader>();
+	particleShader->Create(key, type);
+	m_ParticleShaderMap[key] = particleShader;
+
+	return particleShader;
 }
 
 void ResourceManager::Finalize()

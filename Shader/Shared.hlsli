@@ -36,6 +36,11 @@ cbuffer BoolBuffer : register(b1)
     int UseOpacityMap;
     int UseMetalnessMap;
     int UseRoughnessMap;   // 16
+    
+    int UseCubeMap;
+    float MetalnessValue = 1.0f;
+    float RoughnessValue = 1.0f;
+    int mapPad;
 }
 
 cbuffer TransformW : register(b2)
@@ -61,8 +66,20 @@ cbuffer LightDirBuffer : register(b4)
 
 cbuffer MatrixPalette : register(b5)
 {
-    matrix MatrixPaletteArray[128];
+    matrix MatrixPaletteArray[256];
 }
+
+cbuffer PointLight : register(b6)
+{
+    float4 lightPosition;
+    float lightRange;
+    float linearTerm;
+    float quadraticTerm;
+    float lightIntensity;
+    
+    float3 lightColor;
+    float lightPad;
+};
 
 //--------------------------------------------------------------------------------------
 struct VS_INPUT
@@ -83,6 +100,7 @@ struct PS_INPUT
 {
     float4 Pos : SV_POSITION;
     float4 ShadowPos : POSTION;
+    float4 WorldPos : WorldPosition;
     float2 Tex : UV;
     float3 Norm : NORMAL;
     float3 TangentWorld : TANGENT;

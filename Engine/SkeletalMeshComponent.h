@@ -2,6 +2,7 @@
 #include "RenderComponent.h"
 
 class SkeletalMeshModel;
+class Material;
 
 /// <summary>
 ///	SkeletalMesh를 렌더링하기 위한 컴포넌트
@@ -20,6 +21,7 @@ public:
 
 	// CreateComponent 후 필수적으로 filePath 설정
 	void SetPlaySpeed(float speed) { m_animationPlaySpeed = speed; }
+	Material* SetMaterial(Material* material, int instanceNumber);
 
 	void SetDefaultAnimation(std::string_view filePath);
 	void ChangeAnimation(std::string name);

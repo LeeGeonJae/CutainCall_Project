@@ -12,6 +12,10 @@ public:
 	~UIManager();
 
 public:
+	template <typename UIType>
+	std::weak_ptr<UIType> GetUIObject(const std::wstring& name);
+
+public:
 	template <typename UIType, typename... FunctorTypes>
 		requires std::is_base_of<UIObject, UIType>::value
 	&& ((std::is_base_of<UIFunctor, FunctorTypes>::value || std::is_same<FunctorTypes, void>::value) && ...)
@@ -23,6 +27,7 @@ public:
 private:
 	void ClearFocusedUI();
 	void UpdateHoveredUI(float deltaTime);
+	void UpdateHoverOutUI(float deltaTime);
 	void UpdateClickedUI(float deltaTime);
 
 	template <typename FunctorType>
@@ -31,6 +36,7 @@ private:
 private:
 	std::unordered_map<std::wstring, std::shared_ptr<UIObject>> m_UIObjects;
 	std::vector<std::weak_ptr<UIObject>> m_HoveredUIObjects;
+	std::vector<std::weak_ptr<UIObject>> m_HoverOutUIObjects;
 	std::vector<std::weak_ptr<UIObject>> m_ClickedUIObjects;
 
 	// InputProcesser을(를) 통해 상속됨
@@ -68,4 +74,14 @@ inline void UIManager::ApplyFunctor(auto& uiObject)
 			uiObject->SetMouseClickFunctor(createdFunctor);
 		}
 	}
+}
+
+template<typename UIType>
+inline std::weak_ptr<UIType> UIManager::GetUIObject(const std::wstring& name)
+{
+	auto it = m_UIObjects.find(name);
+	if (it != m_UIObjects.end()) {
+		return std::dynamic_pointer_cast<UIType>(it->second);
+	}
+	return std::weak_ptr<UIType>();
 }

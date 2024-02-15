@@ -73,7 +73,7 @@ public:
 	template<typename T>
 	void CreateVertexBuffer(T* vertices, UINT vertexCount, ID3D11Buffer** vertexBuffer);
 
- 	void UpdateMatrixPalette(Matrix* MatrixPalettePrt);
+ //	void UpdateMatrixPalette(Matrix* MatrixPalettePrt);
 
 	std::vector<BoneWeightVertex>	m_BoneWeightVertices;
 	std::vector<Vertex>				m_Vertices;
@@ -90,6 +90,8 @@ public:
 	UINT m_VertexBufferOffset = 0;		// 버텍스 버퍼의 오프셋.
 	UINT m_IndexCount = 0;				// 인덱스 개수.
 	UINT m_MaterialIndex = 0;			// 메테리얼 인덱스.
+
+	string m_MeshName;
 };
 
 template<typename T>

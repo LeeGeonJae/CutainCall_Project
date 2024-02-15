@@ -10,15 +10,17 @@
 
 SkeletalMeshModel::SkeletalMeshModel()
 {
-	//D3DRenderManager::Instance->m_SkeletalMeshComponents.push_back(this);
-	//m_iterator = --D3DRenderManager::Instance->m_SkeletalMeshComponents.end();
 }
 
 SkeletalMeshModel::~SkeletalMeshModel()
 {
-//	D3DRenderManager::Instance->m_SkeletalMeshComponents.erase(m_iterator);
 }
  
+void SkeletalMeshModel::SetInstanceMaterial(Material* material, int instanceNumber)
+{
+	m_MeshInstances[instanceNumber].m_pMaterial = material;
+}
+
 bool SkeletalMeshModel::ReadSceneResourceFromFBX(std::string filePath)
 { 
 	 //FBX 파일 읽기
@@ -43,7 +45,7 @@ void SkeletalMeshModel::SetSceneResource(std::shared_ptr<ModelResource> val)
 	for (UINT i = 0; i < m_ModelResource->m_Meshes.size(); i++)
 	{
 		Mesh* meshResource = &m_ModelResource->m_Meshes[i];
-		Material* material = &m_ModelResource->m_Materials[i];
+		Material* material = m_ModelResource->GetMeshMaterial(i);
 		m_MeshInstances[i].Create(meshResource, &m_RootNode, material); 
 	}
 	InitBoneAnimationReference(0);	// 각 노드의 애니메이션 정보참조 연결	
@@ -62,6 +64,25 @@ void SkeletalMeshModel::ChangeBoneAnimationReference(UINT index)
 		Bone* pBone = m_RootNode.FindNode(nodeAnimation.m_NodeName);
 		assert(pBone != nullptr);
 		pBone->m_pNextNodeAnimation = &animation->m_NodeAnims[i];
+	}
+}
+
+void SkeletalMeshModel::SettingBindposeMatrix()
+{
+	// 여기에선 애니메이션이 바뀔 경우 안쓸 본의 행렬 초기화 작업.
+	// Setting Bindpose Matrix 
+	SkeletonResource* pSkeleton = &m_ModelResource->m_Skeleton;
+	for (size_t i = 0; i < pSkeleton->Bones.size(); i++)
+	{
+		BoneInfo* pBoneInfo = pSkeleton->GetBone(i);
+		Bone* pBone = m_RootNode.FindNode(pBoneInfo->Name);
+
+		assert(pBone != nullptr);
+		if (pBone->m_pNextNodeAnimation == nullptr)
+		{
+			pBone->m_pCurNodeAnimation = nullptr;
+			pBone->m_localTransform = pBoneInfo->RelativeTransform; // T포즈
+		}
 	}
 }
 

@@ -1,5 +1,6 @@
 #pragma once
 #include "Controller.h"
+
 class FPSCameraController :
 	public Controller
 {

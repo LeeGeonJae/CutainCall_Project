@@ -19,6 +19,7 @@ public:
 
 public:
 	void Create(Mesh* pMeshResource, Bone* pRootNode, Material* pMaterial);
+	void BindingMaterial(Material* pMaterial);
 	void UpdateMatrixPallete(Math::Matrix* MatrixPalettePtr);
 	virtual void Render(ID3D11DeviceContext* deviceContext);
 };

@@ -57,6 +57,8 @@ void PipeLine::createSamplerState()
 	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
 	HR_T(m_pDevice->CreateSamplerState(&sampDesc, m_pShadowSampler.GetAddressOf()));
 
+	m_pDeviceContext->VSSetSamplers(0, 1, m_pSamplerLinear.GetAddressOf());
+	m_pDeviceContext->GSSetSamplers(0, 1, m_pSamplerLinear.GetAddressOf());
 	m_pDeviceContext->PSSetSamplers(0, 1, m_pSamplerLinear.GetAddressOf());
 	m_pDeviceContext->PSSetSamplers(1, 1, m_pSamplerClamp.GetAddressOf());
 	m_pDeviceContext->PSSetSamplers(2, 1, m_pShadowSampler.GetAddressOf());
@@ -80,7 +82,21 @@ void PipeLine::createBlendState()
 	blendDesc.AlphaToCoverageEnable = false;  // 다중 샘플링 앤틸리어싱(Anti-aliasing)을 지원하기 위해 사용
 	blendDesc.IndependentBlendEnable = false; // 각 렌더 타겟에 대한 독립적인 블렌딩 설정을 사용할지 여부
 	blendDesc.RenderTarget[0] = rtBlendDesc;
-	HR_T(m_pDevice->CreateBlendState(&blendDesc, &m_pAlphaBlendState));
+	HR_T(m_pDevice->CreateBlendState(&blendDesc, m_pAlphaBlendState.GetAddressOf()));
+
+	//AdditiveBlending
+	D3D11_BLEND_DESC additiveBlendingDesc = { 0, };
+	additiveBlendingDesc.AlphaToCoverageEnable = false;
+	additiveBlendingDesc.IndependentBlendEnable = false;
+	additiveBlendingDesc.RenderTarget[0].BlendEnable = true;
+	additiveBlendingDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+	additiveBlendingDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
+	additiveBlendingDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+	additiveBlendingDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ZERO;
+	additiveBlendingDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+	additiveBlendingDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	additiveBlendingDesc.RenderTarget[0].RenderTargetWriteMask = 0x0F;
+	HR_T(m_pDevice->CreateBlendState(&additiveBlendingDesc, m_pParticleBlendState.GetAddressOf()));
 }
 
 void PipeLine::createDepthStencilState()
@@ -91,13 +107,21 @@ void PipeLine::createDepthStencilState()
 	lessEqualDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL; // 깊이 판정할 때 같은 넘도 통과
 	lessEqualDesc.StencilEnable = false;
 
-	D3D11_DEPTH_STENCIL_DESC descDS = {};
-	descDS.DepthEnable = true;
-	descDS.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
-	descDS.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
+	D3D11_DEPTH_STENCIL_DESC noDepthWirtesDesc = {};
+	noDepthWirtesDesc.DepthEnable = true;
+	noDepthWirtesDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+	noDepthWirtesDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
+	noDepthWirtesDesc.StencilEnable = false;
 
-	HR_T(m_pDevice->CreateDepthStencilState(&lessEqualDesc, &m_LessEqualDSS));
-	HR_T(m_pDevice->CreateDepthStencilState(&descDS, m_pDisableDepthStencilState.GetAddressOf()));
+	D3D11_DEPTH_STENCIL_DESC disableDepthDesc = {};
+	disableDepthDesc.DepthEnable = false;
+	disableDepthDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+	disableDepthDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
+	disableDepthDesc.StencilEnable = false;
+
+	HR_T(m_pDevice->CreateDepthStencilState(&lessEqualDesc, m_LessEqualDSS.GetAddressOf()));
+	HR_T(m_pDevice->CreateDepthStencilState(&noDepthWirtesDesc, m_pNoDepthWritesDSS.GetAddressOf()));
+	HR_T(m_pDevice->CreateDepthStencilState(&disableDepthDesc, m_pDisableDepthDSS.GetAddressOf()));
 }
 
 void PipeLine::createRasterizerState()

@@ -47,10 +47,14 @@ public:
 	void ClientSetReady(std::shared_ptr<Session> session, char* pMsg);
 	void SetTurn(std::shared_ptr<Session> session, char* pMsg);
 	void EndTurn(std::shared_ptr<Session> session, char* pMsg);
-	void ChangeTurn(std::shared_ptr<Session> session, char* pMsg);
+	void ChangeTurn();
+	void StartTurn(std::shared_ptr<Session> session, char* pMsg);
+	void BroadcastCheckAction();
 	void BroadcastMsg(std::shared_ptr<Session> session, char* pMsg);
-	void SendCharacterPosition(char* pMsg);
+	void SendCharacterPosition(std::shared_ptr<Session> session, char* pMsg);
+	void EndAction(std::shared_ptr<Session> session, char* pMsg);
 	void IsAllReady();
+	void IsAllEnd();
 
 	void ServerLoop();
 
@@ -62,10 +66,11 @@ private:
 
 	int m_ClientCount = 0;
 
-	bool m_bAllReady = false;
-
 	HANDLE	m_hQuitEvent;
 
+	bool m_bAllReady = false;
+	bool m_bAllEnd = false;
 	bool m_bRun = false;
+	char m_currentTurn;
 };
 

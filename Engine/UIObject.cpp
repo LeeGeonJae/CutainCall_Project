@@ -21,7 +21,15 @@ void UIObject::ExecuteHoverFunctors(float deltaTime)
 {
 	for (auto& functor : m_mouseHoverFunctors)
 	{
-		functor->Execute(*this, deltaTime);
+		functor->ExecuteHovered(*this, deltaTime);
+	}
+}
+
+void UIObject::ExecuteHoverOutFunctors(float deltaTime)
+{
+	for (auto& functor : m_mouseHoverFunctors)
+	{
+		functor->ExecuteHoverOut(*this, deltaTime);
 	}
 }
 
@@ -50,15 +58,17 @@ void UIObject::Update(float deltaTime)
 		m_worldMatrix = m_worldMatrix * m_parent.lock()->GetWorldMatrix();
 	}
 
+	if (m_bVisible) 
+	{
+		CommonApp::m_pInstance->GetRenderer()->AddUIInstance(m_uiInstance);
+	}
+
 	for (auto& child : m_children)
 	{
 		child->Update(deltaTime);
 	}
-
-	if (m_bVisible) {
-		CommonApp::m_pInstance->GetRenderer()->AddUIInstance(m_uiInstance);
-	}
 }
+
 
 void UIObject::SetParent(std::shared_ptr<UIObject> parent)
 {
@@ -72,5 +82,15 @@ void UIObject::RemoveChild(std::shared_ptr<UIObject> child)
 	if (it != m_children.end())
 	{
 		m_children.erase(it);
+	}
+}
+
+void UIObject::SetAllVisible(bool isVisible)
+{ 
+	m_bVisible = isVisible;
+
+	for (auto& child : m_children)
+	{
+		child->SetAllVisible(isVisible);
 	}
 }

@@ -8,7 +8,7 @@ enum class eEventType;
 enum class eWorldType;
 enum class eObjectType;
 
-using eventVariant = std::variant<eWorldType, eObjectType, bool, const char*>;
+using eventVariant = std::variant<eWorldType, eObjectType, const char*, Vector3, bool>;
 
 class Event
 {

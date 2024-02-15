@@ -6,6 +6,9 @@
 
 #include "TestWorld.h"
 #include "TestWorld2.h"
+#include "TestWorld3.h"
+#include "MainWorld.h"
+#include "Stage1World.h"
 
 #include "../Engine/Model.h"
 #include "../Engine/GameObject.h"
@@ -75,7 +78,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	}
 	// 메모리 해제
 	LocalFree(argv);
-	
+
 	App.Initialize();
 	App.Run();
 	App.Finalize();
@@ -93,16 +96,20 @@ bool GameApp::Initialize()
 	bool res = __super::Initialize();
 
 	std::shared_ptr<TestWorld> testWorld = WorldManager::GetInstance()->RegisterWorld<TestWorld>("testWorld", eWorldType::TEST).lock();
-	WorldManager::GetInstance()->SetDefaultWorld(testWorld);
-	EventManager::GetInstance()->RegisterListener(eEventType::CHANGE_WORLD, testWorld.get());
-	EventManager::GetInstance()->RegisterListener(eEventType::DELETE_OBJECT, testWorld.get());
-
 	std::shared_ptr<TestWorld2> testWorld2 = WorldManager::GetInstance()->RegisterWorld<TestWorld2>("testWorld2", eWorldType::TEST2).lock();
+	std::shared_ptr<TestWorld3> testWorld3 = WorldManager::GetInstance()->RegisterWorld<TestWorld3>("testWorld3", eWorldType::TEST3).lock();
+	std::shared_ptr<MainWorld> mainWorld = WorldManager::GetInstance()->RegisterWorld<MainWorld>("mainWorld", eWorldType::MAIN).lock();
+	std::shared_ptr<Stage1World> stage1 = WorldManager::GetInstance()->RegisterWorld<Stage1World>("stage1", eWorldType::STAGE1).lock();
+
 
 	EventManager::GetInstance()->RegisterListener(eEventType::CHANGE_WORLD, testWorld2.get());
+	EventManager::GetInstance()->RegisterListener(eEventType::CHANGE_WORLD, mainWorld.get());
 
+	WorldManager::GetInstance()->SetDefaultWorld(testWorld);
+	//WorldManager::GetInstance()->SetDefaultWorld(stage1);
+	//WorldManager::GetInstance()->SetDefaultWorld(testWorld);
 	WorldManager::GetInstance()->Initialize();
-	
+
 	/// 이벤트 매니저는 제일 끝에
 	EventManager::GetInstance()->Initialize();
 
@@ -114,7 +121,6 @@ void GameApp::Update()
 	WorldManager::GetInstance()->Update(m_deltaTime);
 
 	CommonApp::Update();
-
 }
 
 void GameApp::Render()
@@ -130,7 +136,7 @@ void GameApp::Finalize()
 	if (m_bHost)
 		m_server.CleanUp();
 	m_client.CleanUp();
-	
+
 	WorldManager::GetInstance()->Finalize();
 	EventManager::GetInstance()->Finalize();
 	CommonApp::Finalize();

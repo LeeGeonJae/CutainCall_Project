@@ -31,6 +31,13 @@ cbuffer UIAnimationKeyframe : register(b6)
     int UseAnimation;
 }
 
+cbuffer DeltaTime : register(b7)
+{
+    float deltaTime;
+    int UseFade;
+    float pad[2];
+}
+
 PS_INPUT main(VS_INPUT input)
 {
     PS_INPUT output;

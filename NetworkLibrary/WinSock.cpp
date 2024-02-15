@@ -105,7 +105,7 @@ bool WinSock::Accept(WinSock& acceptSocket)
     return true;
 }
 
-bool WinSock::Connect(const char* ip, int port)
+int WinSock::Connect(const char* ip, int port)
 {
     SOCKADDR_IN serverAddr;
     ::memset(&serverAddr, 0, sizeof(serverAddr));
@@ -114,9 +114,8 @@ bool WinSock::Connect(const char* ip, int port)
     serverAddr.sin_port = ::htons(port);
     inet_pton(AF_INET, ip, &(serverAddr.sin_addr));
 
-    if (::connect(m_hSocket, (SOCKADDR*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR) return false;
-
-    return true;
+    int connectedResult = ::connect(m_hSocket, (SOCKADDR*)&serverAddr, sizeof(serverAddr));
+    return connectedResult;
 }
 
 bool WinSock::DisConnect()

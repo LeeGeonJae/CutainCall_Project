@@ -15,6 +15,7 @@ static const float3 Fdielectric = 0.04;
 float ndfGGX(float cosLh, float roughness)
 {
     float alpha = roughness * roughness;
+
     float alphaSq = alpha * alpha;
 
     float denom = (cosLh * cosLh) * (alphaSq - 1.0) + 1.0;
@@ -50,6 +51,32 @@ uint querySpecularTextureLevels()
 }
 
 
+float3 ComputePointLight(PS_INPUT Input)
+{
+    float3 normal = normalize(Input.Norm);
+
+     // Light Vector  ->  [obj -> PointLight]
+    float3 toLightVec = normalize(lightPosition.xyz - Input.WorldPos.xyz);
+    float3 reflection = reflect(-toLightVec.xyz, normal);
+       
+    float3 diffuse = saturate(dot(toLightVec.xyz, normal));
+    float3 specualr = saturate(dot(reflection, -normalize(Input.mViewDir)));
+     
+     // 표면으로부터 광원까지 거리
+    float d = distance(lightPosition, Input.WorldPos);
+    
+    if (d > lightRange)
+        return float3(0, 0, 0);
+    
+    // Normalize Light Vector
+    toLightVec /= d;
+    
+    float att = 1.0f / (1 + (linearTerm * d) + (quadraticTerm * d * d)); // * d;
+     
+    float3 FinalColor = att * lightIntensity * (diffuse + specualr);
+    return FinalColor;
+}
+
 
 float4 main(PS_INPUT Input) : SV_Target
 {
@@ -80,10 +107,10 @@ float4 main(PS_INPUT Input) : SV_Target
     if (UseEmissiveMap)
         Emissive = txEmissive.Sample(samLinear, Input.Tex).rgb;
     if (UseMetalnessMap)
-        Metalness = txMetalness.Sample(samLinear, Input.Tex).r;
+        Metalness = txMetalness.Sample(samLinear, Input.Tex).r * MetalnessValue;
     if (UseRoughnessMap)
-        Roughness = txRoughness.Sample(samLinear, Input.Tex).r;
-    if (UseOpacityMap)
+        Roughness = txRoughness.Sample(samLinear, Input.Tex).r * RoughnessValue;
+    if (UseOpacityMap) 
         Opacity = txOpacity.Sample(samLinear, Input.Tex).r;
     
     //--------------------------------------------------------------------------
@@ -190,7 +217,8 @@ float4 main(PS_INPUT Input) : SV_Target
         }
     }
     
-    float3 final = directLighting + ambientLighting / 5 + Emissive;
+    //float3 final = directLighting + ambientLighting + Emissive;
+    float3 final = directLighting + ambientLighting + Emissive;
     float4 finalColor = float4(final, Opacity);
     
     if (UseGamma)

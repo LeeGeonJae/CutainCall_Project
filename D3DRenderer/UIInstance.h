@@ -3,6 +3,16 @@
 class Texture;
 class UIMesh;
 
+struct CB_FadeInOut
+{
+	float fadeDeltaTime = 0.0f;
+	int IsFade = false;
+	int UseFadeOut = false;
+	int UseFadeIn = false;
+	float durationTime = 0.0f;
+	float pad[3];
+};
+
 struct CB_UIAnimationKeyframe
 {
 	Vector2 m_Offset = Vector2{ 0.f, 0.f };
@@ -24,18 +34,41 @@ public:
 	void SetIsLoop(bool isloop) { m_bIsLoop = isloop; }
 	void SetIsRender(bool isRender) { m_bIsRender = isRender; }
 	Math::Matrix* GetWorldMatrix() { return m_pWorldTransform; }
-	bool IsRender() { return m_bIsRender; }
+	bool GetIsRender() { return m_bIsRender; }
 	void NotLoopAnimationStart() { if (!m_bIsLoop) { m_nCurrentAnimationIndex = 0; m_DurationTime = 0; } }
 
 	void AddKeyframe(CB_UIAnimationKeyframe keyframe) { m_KeyFrame.push_back(keyframe); }
+	
+	// Fade In Out Data
+	void SetIsFade() {m_FadeInOut.IsFade = true; }
+	void SetFadeDurationTime(float durationTime) {  m_FadeInOut.durationTime = durationTime; }
+	void FadeOutStart()
+	{
+		if (m_FadeInOut.UseFadeIn == false)
+		{
+			m_FadeInOut.UseFadeOut = true;
+			m_bIsPlayingFade = true;
+		}
+	}
+	void FadeInStart()
+	{
+		if (m_FadeInOut.UseFadeOut == false)
+		{
+			m_FadeInOut.UseFadeIn = true;
+			m_bIsPlayingFade = true;
+		}
+	}
 
 public:
 	void LoadTextureResource(std::wstring_view texturePath);
 	void Create(Math::Matrix* pWorld, Math::Vector2 size);
 	void Update(float deltaTime);
+	void UpdateFadeInOut(float deltaTime);
+
 	void Render(ID3D11DeviceContext* deviceContext);
 
 	void UIAnimationPlay(CB_UIAnimationKeyframe& animationKeyFrame);
+	void UIFadeInOut(CB_FadeInOut& fadeInOut);
 
 private:
 	bool m_bIsRender;
@@ -49,4 +82,9 @@ private:
 	float m_AnimationTime;
 	int m_nCurrentAnimationIndex;
 	std::vector<CB_UIAnimationKeyframe> m_KeyFrame;
+
+	// ÀçÇö
+	float m_FadeDelTaTime = 0.0f;  // for CB
+	bool m_bIsPlayingFade = false;
+	CB_FadeInOut m_FadeInOut;
 };

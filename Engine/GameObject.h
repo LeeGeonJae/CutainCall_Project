@@ -6,7 +6,6 @@
 #include <unordered_map>
 
 #include "Component.h"
-#include "SceneComponent.h"
 
 class World;
 class Component;
@@ -15,6 +14,8 @@ class SceneComponent;
 enum class eObjectType
 {
 	TEST,
+	PLANE,
+	LEVEL,
 	PLAYER,
 	CAMERA,
 
@@ -40,11 +41,19 @@ public:
 	void SetOwnerWorld(std::shared_ptr<World> pWorld) { m_pOwnerWorld = pWorld; }
 	void SetOwnerObject(std::shared_ptr<GameObject> pObject) { m_pOwnerObj = pObject; }
 	void SetRootComponent(std::shared_ptr<SceneComponent> pRootcomponent) { m_pRootComponent = pRootcomponent; }
+	void SetPosition(Vector3 position);
+	void SetRotation(Vector3 rotation);
+	void SetScale(Vector3 scale);
 
 	std::string GetName() const { return m_name; }
+	eObjectType GetObjectType() const { return m_objectType; }
 	std::weak_ptr<World> GetOwnerWorld() const { return m_pOwnerWorld; }
 	std::weak_ptr<SceneComponent> GetRootComponent() const { return m_pRootComponent; }
 	std::weak_ptr<Component> GetComponent(std::string_view name) const;
+	const Vector3& GetPosition() const;
+	const Vector3& GetRotation() const;
+	const Vector3& GetScale() const;
+	const Matrix& GetTransform() const;
 
 public:
 	virtual void Initialize();
@@ -79,5 +88,19 @@ public:
 		m_ownComponents.emplace_back(component);
 
 		return component;
+	}
+
+	template <typename T>
+	std::weak_ptr<T> GetComponentByTypeName() const
+	{
+		for (const auto& component : m_ownComponents)
+		{
+			std::shared_ptr<T> typedComponent = std::dynamic_pointer_cast<T>(component);
+			if (typedComponent)
+			{
+				return typedComponent;
+			}
+		}
+		return std::weak_ptr<T>();
 	}
 };

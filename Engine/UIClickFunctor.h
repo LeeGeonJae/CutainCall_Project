@@ -6,5 +6,5 @@ class UIClickFunctor :
 {
 public:
 	virtual ~UIClickFunctor() = default;
-	virtual void Execute(const UIObject& onwer, float deltaTime) override;
+	virtual void Execute(UIObject& onwer, float deltaTime) abstract;
 };

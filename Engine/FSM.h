@@ -20,7 +20,7 @@ public:
 
 	void AddState(std::string_view name, FSMState* state);
 	void AddAnimation(std::string_view stateName, std::string_view animationName);
-	FSMState* FindState(std::string name) { return m_stateMap.find(name)->second; }
+	FSMState* FindState(std::string name) const { return m_stateMap.find(name)->second; }
 
 	void Update(float deltaTime);
 

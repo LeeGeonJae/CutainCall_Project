@@ -22,12 +22,12 @@ public:
 	void SetLocalRotation(const Math::Vector3 rot);
 	void SetLocalTransform(Math::Matrix matrix);
 
-	const Math::Vector3& GetLocalPosition() const { return m_localPosition; }
-	const Math::Vector3& GetLocalScale() const { return m_localScale; }
-	const Math::Vector3& GetLocalRotation() const { return m_localRotation; }
-	const Math::Matrix& GetWorldTransform() { return m_worldMatrix; }
-	const Math::Matrix& GetLocalTransform() { return m_localMatrix; }
-	const Math::Vector3& GetForward() const;
+	Math::Vector3& GetLocalPosition() { return m_localPosition; }
+	Math::Vector3& GetLocalScale() { return m_localScale; }
+	Math::Vector3& GetLocalRotation() { return m_localRotation; }
+	Math::Matrix& GetWorldTransform() { return m_worldMatrix; }
+	Math::Matrix& GetLocalTransform() { return m_localMatrix; }
+	 Math::Vector3& GetForward() const;
 
 public:
 	void Initialize() override;

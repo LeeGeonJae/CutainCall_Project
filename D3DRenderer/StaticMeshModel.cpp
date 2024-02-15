@@ -6,23 +6,13 @@
 
 StaticMeshModel::StaticMeshModel()
 {
-	//D3DRenderManager::Instance->m_StaticMeshModels.push_back(this);
-	//m_iterator = --D3DRenderManager::Instance->m_StaticMeshModels.end();
 }
 
 StaticMeshModel::~StaticMeshModel()
 {
-//	D3DRenderManager::Instance->m_StaticMeshComponents.erase(m_iterator);
-	int a = 0;
 	m_ModelResource.reset();
 	m_MeshInstances.clear();
 }
-
-
-//void StaticMeshModel::Update(float DeltaTime)
-//{
-//	__super::Update(DeltaTime);
-//}
 
 bool StaticMeshModel::ReadSceneResourceFromFBX(std::string filePath)
 {

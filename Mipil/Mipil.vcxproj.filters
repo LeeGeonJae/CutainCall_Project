@@ -16,14 +16,32 @@
     <Filter Include="4. FSM">
       <UniqueIdentifier>{8ac5a466-49ee-47d1-912d-9c98fe9190cb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="4. FSM\State">
-      <UniqueIdentifier>{05f6ed83-80d4-475a-a867-7dd01286dc26}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="4. FSM\State\Transition">
-      <UniqueIdentifier>{b48f7c9f-3f19-4c0c-ad9f-eb65b8c77653}</UniqueIdentifier>
-    </Filter>
     <Filter Include="5. Utill">
       <UniqueIdentifier>{ca53bf32-f012-4ac6-81f1-8819f086ba6b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="6. Manager">
+      <UniqueIdentifier>{e79f94e1-cd62-4e14-9a65-c3d5eb462c7f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="5. Utill\YAMLParser">
+      <UniqueIdentifier>{2fb290e5-2318-4060-8287-601d5e5dabc6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="5. Utill\BlockGenerator">
+      <UniqueIdentifier>{5c439d95-aa65-4d97-8f90-feed118b5bcc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3. Object\CubeMap">
+      <UniqueIdentifier>{df3950b2-eceb-4801-9c55-c96b008d83cf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3. Object\Player">
+      <UniqueIdentifier>{fa733cb2-f6b6-4de9-ac99-206b8a5fc9dc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3. Object\Block">
+      <UniqueIdentifier>{10e1f4c2-cfc2-4206-b633-4c00081ff8ed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="4. FSM\Transition">
+      <UniqueIdentifier>{a62eaba5-7460-4b26-ad69-f65f2bd2baf7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="4. FSM\State">
+      <UniqueIdentifier>{1dc50daf-f2c9-418d-964e-c8494a9f0746}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -39,7 +57,7 @@
     <ClInclude Include="pch.h">
       <Filter>0. Configuration</Filter>
     </ClInclude>
-    <ClInclude Include="PlayerObject.h">
+    <ClInclude Include="TestPlayerObject.h">
       <Filter>3. Object</Filter>
     </ClInclude>
     <ClInclude Include="StaticTestObject.h">
@@ -48,22 +66,50 @@
     <ClInclude Include="TestWorld2.h">
       <Filter>2. World</Filter>
     </ClInclude>
-    <ClInclude Include="RunState.h">
-      <Filter>4. FSM\State</Filter>
+    <ClInclude Include="BlockGenerator.h">
+      <Filter>5. Utill\BlockGenerator</Filter>
     </ClInclude>
-    <ClInclude Include="IdleState.h">
-      <Filter>4. FSM\State</Filter>
+    <ClInclude Include="CubeMapObject.h">
+      <Filter>3. Object\CubeMap</Filter>
     </ClInclude>
-    <ClInclude Include="PlayerTransition.h">
-      <Filter>4. FSM\State\Transition</Filter>
+    <ClInclude Include="BlockPOD.h">
+      <Filter>5. Utill</Filter>
     </ClInclude>
+    <ClInclude Include="BlockObject.h">
+      <Filter>3. Object\Block</Filter>
+    </ClInclude>
+    <ClInclude Include="YAMLParser.h" />
+    <ClInclude Include="StaticFbxObject.h" />
+    <ClInclude Include="YAMLParser.h">
+      <Filter>5. Utill\YAMLParser</Filter>
+    </ClInclude>
+    <ClInclude Include="GridManager.h">
+      <Filter>6. Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="TestWorld3.h">
+      <Filter>2. World</Filter>
+    </ClInclude>
+    <ClInclude Include="SkeletalFbxObject.h" />
+    <ClInclude Include="MainWorld.h">
+      <Filter>2. World</Filter>
+    </ClInclude>
+    <ClInclude Include="Stage1World.h">
+      <Filter>2. World</Filter>
+    </ClInclude>
+    <ClInclude Include="UIMeshTestObject.h" />
     <ClInclude Include="PlayerFSM.h">
       <Filter>4. FSM</Filter>
     </ClInclude>
-    <ClInclude Include="CubeMapObject.h">
-      <Filter>3. Object</Filter>
+    <ClInclude Include="PlayerTransition.h">
+      <Filter>4. FSM\Transition</Filter>
     </ClInclude>
-    <ClInclude Include="YAMLParser.h" />
+    <ClInclude Include="PlayerState.h">
+      <Filter>4. FSM\State</Filter>
+    </ClInclude>
+    <ClInclude Include="PuzzleWorld.h">
+      <Filter>2. World</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerObject.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameApp.cpp">
@@ -75,7 +121,7 @@
     <ClCompile Include="pch.cpp">
       <Filter>0. Configuration</Filter>
     </ClCompile>
-    <ClCompile Include="PlayerObject.cpp">
+    <ClCompile Include="TestPlayerObject.cpp">
       <Filter>3. Object</Filter>
     </ClCompile>
     <ClCompile Include="StaticTestObject.cpp">
@@ -84,21 +130,46 @@
     <ClCompile Include="TestWorld2.cpp">
       <Filter>2. World</Filter>
     </ClCompile>
-    <ClCompile Include="RunState.cpp">
-      <Filter>4. FSM\State</Filter>
+    <ClCompile Include="BlockGenerator.cpp">
+      <Filter>5. Utill\BlockGenerator</Filter>
     </ClCompile>
-    <ClCompile Include="IdleState.cpp">
-      <Filter>4. FSM\State</Filter>
+    <ClCompile Include="CubeMapObject.cpp">
+      <Filter>3. Object\CubeMap</Filter>
     </ClCompile>
-    <ClCompile Include="PlayerTransition.cpp">
-      <Filter>4. FSM\State\Transition</Filter>
+    <ClCompile Include="BlockObject.cpp">
+      <Filter>3. Object\Block</Filter>
     </ClCompile>
+    <ClCompile Include="YAMLParser.cpp" />
+    <ClCompile Include="StaticFbxObject.cpp" />
+    <ClCompile Include="YAMLParser.cpp">
+      <Filter>5. Utill\YAMLParser</Filter>
+    </ClCompile>
+    <ClCompile Include="GridManager.cpp">
+      <Filter>6. Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="TestWorld3.cpp">
+      <Filter>2. World</Filter>
+    </ClCompile>
+    <ClCompile Include="SkeletalFbxObject.cpp" />
+    <ClCompile Include="MainWorld.cpp">
+      <Filter>2. World</Filter>
+    </ClCompile>
+    <ClCompile Include="Stage1World.cpp">
+      <Filter>2. World</Filter>
+    </ClCompile>
+    <ClCompile Include="UIMeshTestObject.cpp" />
     <ClCompile Include="PlayerFSM.cpp">
       <Filter>4. FSM</Filter>
     </ClCompile>
-    <ClCompile Include="CubeMapObject.cpp">
-      <Filter>3. Object</Filter>
+    <ClCompile Include="PlayerTransition.cpp">
+      <Filter>4. FSM\Transition</Filter>
     </ClCompile>
-    <ClCompile Include="YAMLParser.cpp" />
+    <ClCompile Include="PlayerState.cpp">
+      <Filter>4. FSM\State</Filter>
+    </ClCompile>
+    <ClCompile Include="PuzzleWorld.cpp">
+      <Filter>2. World</Filter>
+    </ClCompile>
+    <ClCompile Include="PlayerObject.cpp" />
   </ItemGroup>
 </Project>

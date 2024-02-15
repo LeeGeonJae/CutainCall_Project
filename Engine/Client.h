@@ -28,7 +28,7 @@ public:
 	void CleanUp();
 	// recv해서 받은 버퍼가 유효한 패킷인지 확인하기.
 	void Read(char* buf);
-	void Write(char buf[], int size);
+	void Write(char* buf);
 
 	void OnNetError(int errorCode, const char* errorMsg, std::shared_ptr<WinSock> pSocket);
 
@@ -54,5 +54,7 @@ private:
 	HANDLE	m_hQuitEvent;
 
 	bool m_bRun = false;
+	int m_connectResult;
+	const char* m_address;
 };
 

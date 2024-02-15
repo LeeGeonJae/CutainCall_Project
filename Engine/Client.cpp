@@ -16,7 +16,8 @@ void ClientNetworkManager::Start(const char* add)
     if (!m_clientSocket->Create())
         return;
 
-    m_clientSocket->Connect(add, 7777);
+    m_connectResult = m_clientSocket->Connect(add, 7777);
+    m_address = add;
 
     m_hQuitEvent = CreateEvent(NULL, false, false, NULL);
     m_bRun = true;
@@ -49,6 +50,11 @@ void ClientNetworkManager::Update()
     {
         if (networkEvents.iErrorCode[FD_CONNECT_BIT] != 0)
         {
+            if (networkEvents.iErrorCode[FD_CONNECT_BIT] == WSAECONNREFUSED)
+            {
+                m_clientSocket->Connect(m_address, 7777);
+                return;
+            }
             OnNetError(networkEvents.iErrorCode[FD_CONNECT_BIT], "Connect", m_clientSocket);
             return;
         }
@@ -99,21 +105,7 @@ void ClientNetworkManager::NetUpdate()
 
         int nSent = m_clientSocket->Send(value.first, value.second);
 
-        short size = (value.first[0] - '0') * 10 + (value.first[1] - '0') % 10;
-
-        // todo 채원: 사이즈가 다를 때 해주는거 바꾸기
-        if (size != nSent)
-            continue;
-
-        if (nSent > 0)
-        {
-            delete[] value.first;
-        }
-        else if (nSent == 0)
-        {
-            // send 할 수 없는 상태인지 아닌지 변수 만들기?
-            // 근데 이렇게 되면 서버가 언제 준비되는지 모름.
-        }
+        delete[] value.first;
     }
 }
 
@@ -166,9 +158,8 @@ void ClientNetworkManager::Read(char* buf)
     if (m_recvBytes < 2)
         return;
 
-    short sizeInfo = 0;
-    sscanf_s(buf, "%2hd", &sizeInfo);
-    //memcpy(&sizeInfo, buf, 2);
+    short sizeInfo;
+    memcpy(&sizeInfo, buf, 2);
 
     if (sizeInfo == m_recvBytes)
     {
@@ -189,10 +180,12 @@ void ClientNetworkManager::Read(char* buf)
         char* packet = new char[m_recvBytes];
         WorldManager::GetInstance()->PushRecvQueue(packet, sizeInfo);
         m_recvBytes -= sizeInfo;
+        memmove(m_recvBuffer, m_recvBuffer + sizeInfo, RCV_BUF_SIZE);
+        Read(m_recvBuffer);
     }
 }
 
-void ClientNetworkManager::Write(char buf[], int size)
+void ClientNetworkManager::Write(char* buf)
 {
 }
 

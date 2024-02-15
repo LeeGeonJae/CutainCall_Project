@@ -11,7 +11,7 @@ void FSMState::AddTransition(FSMTransition* transition)
 
 bool FSMState::CheckTransition()
 {
-	for(auto transition : m_transitions)
+	for(const auto& transition : m_transitions)
 	{
 		std::string stateName = (*transition)();
 		if (!stateName.empty())

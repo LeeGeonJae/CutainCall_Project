@@ -6,5 +6,6 @@ class UIHoverFunctor :
 {
 public:
 	virtual ~UIHoverFunctor() = default;
-	virtual void Execute(const UIObject& onwer, float deltaTime) override;
+	virtual void ExecuteHovered(UIObject& onwer, float deltaTime) abstract;
+	virtual void ExecuteHoverOut(UIObject& onwer, float deltaTime) abstract;
 };

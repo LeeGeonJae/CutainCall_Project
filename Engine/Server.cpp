@@ -154,30 +154,7 @@ void ServerNetworkManager::NetUpdate()
 		while (session.second->PopSendQueue(sendValue))
 		{
 			int nSent = session.second->Send(sendValue.first, sendValue.second);
-
-			PacketHeader packet;
-			DeSerializeBuffer(packet, sendValue.first);
-
-			// todo 채원: 사이즈가 다를 때 해주는거 바꾸기
-			if (packet.size != nSent)
-				continue;
-
-			if (nSent > 0)
-			{
-				delete[] sendValue.first;
-			}
-
-			// 소켓 버퍼가 가득 차서 전송이 불가능
-			else if (nSent == 0)
-			{
-
-			}
-
-			// 소켓 에러가 발생함. 우짤까
-			else
-			{
-
-			}
+			delete[] sendValue.first;
 		}
 	}
 }
@@ -264,32 +241,31 @@ void ServerNetworkManager::onNetError(int errorCode, const char* errorMsg, std::
 
 char* ServerNetworkManager::SerializeBuffer(int size, EPacketId id, char* msg)
 {
-	if (size <= PACKETID_START || size >= PACKETID_END)
+	if (id <= PACKETID_START || id >= PACKETID_END)
 		return nullptr;
 
-	char* buf = new char[size + 1];
+	char* buf = new char[SND_BUF_SIZE];
 
-	buf[0] = size / 10 + '0';
-	buf[1] = size % 10 + '0';
-	buf[2] = id / 10 + '0';
-	buf[3] = id % 10 + '0';
+	PacketHeader ph;
+	ph.size = size;
+	ph.id = id;
+
+	memcpy(buf, &ph, sizeof(PacketHeader));
 
 	if (msg == nullptr)
 		return buf;
 
-	memcpy(buf + 4, msg, size - 4);
+	memcpy(buf + sizeof(PacketHeader), msg, size - sizeof(PacketHeader));
 
 	return buf;
 }
 void ServerNetworkManager::DeSerializeBuffer(PacketHeader& packet, char* buf)
 {
-	//short sizeInfo = 0;
-	short sizeInfo = (buf[0] - '0') * 10 + buf[1] - '0';
-	//	memcpy(&sizeInfo, buf, 2);
+	short sizeInfo = 0;
+	memcpy(&sizeInfo, buf, sizeof(short));
 
-		//EPacketId idInfo;
-	EPacketId idInfo = static_cast<EPacketId>((buf[2] - '0') * 10 + buf[3] - '0');
-	//	memcpy(&idInfo, buf + 2, 2);
+	EPacketId idInfo;
+	memcpy(&idInfo, buf + sizeof(short), sizeof(EPacketId));
 
 	packet.size = sizeInfo;
 	packet.id = idInfo;
@@ -298,23 +274,10 @@ void ServerNetworkManager::DeSerializeBuffer(PacketHeader& packet, char* buf)
 // 게임 로직들
 void ServerNetworkManager::CheckId(std::shared_ptr<Session> session, char* pData, int len)
 {
-	/*PacketHeader* pHeader = reinterpret_cast<PacketHeader*>(pData);
+	PacketHeader pHeader;
+	DeSerializeBuffer(pHeader, pData);
 
-	switch (pHeader->id)
-	{
-	case C2S_READY:
-		short ready = static_cast<int>((pData[4] - '0') * 10 + (pData[5] - '0'));
-		if (ready == 0)
-			m_bReady = false;
-		else
-			m_bReady = true;
-	}*/
-
-	// 헤더 역직렬화
-	PacketHeader packet;
-	DeSerializeBuffer(packet, pData);
-
-	switch (packet.id)
+	switch (pHeader.id)
 	{
 	case C2S_READY:
 		ClientSetReady(session, pData);
@@ -334,15 +297,30 @@ void ServerNetworkManager::CheckId(std::shared_ptr<Session> session, char* pData
 		break;
 
 	case C2S_CHANGE_TURN:
-		ChangeTurn(session, pData);
+		ChangeTurn();
+		break;
+
+	case C2S_START_TURN:
+		StartTurn(session, pData);
+		break;
+
+	case C2S_CHECK_ACTION:
+		BroadcastCheckAction();
 		break;
 
 	case C2S_BROADCAST_MSG:
 		BroadcastMsg(session, pData);
 		break;
+
 	case C2S_CHARACTER_MOVE:
-		SendCharacterPosition(pData);
+		SendCharacterPosition(session, pData);
 		break;
+
+	case C2S_END_ACTION:
+		EndAction(session, pData);
+		IsAllEnd();
+		break;
+	
 	default:
 		break;
 	}
@@ -368,8 +346,11 @@ void ServerNetworkManager::BroadcastMsg(std::shared_ptr<Session> session, char* 
 
 void ServerNetworkManager::ClientSetReady(std::shared_ptr<Session> session, char* pMsg)
 {
+	PacketC2S_READY* pSetReady = reinterpret_cast<PacketC2S_READY*>(pMsg);
+	assert(pSetReady != nullptr);
+
 	// 레디 풀기
-	if (pMsg[4] - '0' == 0)
+	if (pSetReady->clickedReady - '0' == 0)
 		session->SetReadyState(false);
 	// 레디 하기
 	else
@@ -378,18 +359,23 @@ void ServerNetworkManager::ClientSetReady(std::shared_ptr<Session> session, char
 
 void ServerNetworkManager::SetTurn(std::shared_ptr<Session> session, char* pMsg)
 {
-	if (pMsg[4] == '0' && session->GetIsHostSession()) // 현재 루프의 세션이 호스트면 호스트한테 턴 세팅해주기
+	PacketC2S_SetTurn* pSetTurn = reinterpret_cast<PacketC2S_SetTurn*>(pMsg);
+	assert(pSetTurn != nullptr);
+
+	if (pSetTurn->who == '0') // 호스트 턴
 	{
-		char msg[1] = { '0' };
+		PacketS2C_SetTurn st;
+		st.setTurn = '0';
 		session->PushSendQueue(
-			SerializeBuffer(sizeof(PacketS2C_SetTurn), S2C_SET_TURN, msg),
+			SerializeBuffer(sizeof(PacketS2C_SetTurn), S2C_SET_TURN, &st.setTurn),
 			sizeof(PacketS2C_SetTurn));
 	}
-	else if (pMsg[4] == '1' && !session->GetIsHostSession()) // 세션이 게스트면 게스트한테 턴 세팅해주기
+	else if (pSetTurn->who == '1') // 세션이 게스트면 게스트한테 턴 세팅해주기
 	{
-		char msg[1] = { '0' };
+		PacketS2C_SetTurn st;
+		st.setTurn = '1';
 		session->PushSendQueue(
-			SerializeBuffer(sizeof(PacketS2C_SetTurn), S2C_SET_TURN, msg),
+			SerializeBuffer(sizeof(PacketS2C_SetTurn), S2C_SET_TURN, &st.setTurn),
 			sizeof(PacketS2C_SetTurn));
 	}
 }
@@ -401,25 +387,57 @@ void ServerNetworkManager::EndTurn(std::shared_ptr<Session> session, char* pMsg)
 		sizeof(PacketS2C_EndTurn));
 }
 
-void ServerNetworkManager::ChangeTurn(std::shared_ptr<Session> session, char* pMsg)
+void ServerNetworkManager::ChangeTurn()
 {
 	BroadcastPacket(SerializeBuffer(sizeof(PacketS2C_ChangeTurn), S2C_CHANGE_TURN, nullptr), sizeof(PacketS2C_ChangeTurn));
 }
 
-void ServerNetworkManager::SendCharacterPosition(char* pMsg)
+void ServerNetworkManager::StartTurn(std::shared_ptr<Session> session, char* pMsg)
 {
+	/*session->PushSendQueue(
+		SerializeBuffer(sizeof(PacketS2C_StartGame), S2C_START_GAME, nullptr),
+		sizeof(PacketS2C_StartGame));*/
+	BroadcastPacket(SerializeBuffer(sizeof(PacketS2C_StartGame), S2C_START_TURN, nullptr),
+		sizeof(PacketS2C_StartGame));
+}
+
+void ServerNetworkManager::BroadcastCheckAction()
+{
+	BroadcastPacket(SerializeBuffer(sizeof(PacketS2C_CheckAction), S2C_CHECK_ACTION, nullptr), sizeof(PacketS2C_CheckAction));
+}
+
+void ServerNetworkManager::SendCharacterPosition(std::shared_ptr<Session> session, char* pMsg)
+{
+	PacketC2S_CharacterMove* pCharacterMove = reinterpret_cast<PacketC2S_CharacterMove*>(pMsg);
+	assert(pCharacterMove != nullptr);
+
 	// 호스트 서버면
-	if (pMsg[4] == '0')
+	if (pCharacterMove->who == '0')
 	{
-		char host[2] = {'0', '0'}; // 좌
-		BroadcastPacket(SerializeBuffer(sizeof(PacketS2C_CharacterMove), S2C_CHARACTER_MOVE, host), sizeof(PacketS2C_CharacterMove));
+		PacketS2C_CharacterMove cm;
+		cm.who = '0';		// host
+		cm.direction = '0';	// z축으로
+
+		session->PushSendQueue(
+			SerializeBuffer(sizeof(PacketS2C_CharacterMove), S2C_CHARACTER_MOVE, &cm.who), sizeof(PacketS2C_CharacterMove));
+		//BroadcastPacket(SerializeBuffer(sizeof(PacketS2C_CharacterMove), S2C_CHARACTER_MOVE, &cm.who), sizeof(PacketS2C_CharacterMove));
 	}
 	// 게스트 서버면
-	else
+	else if(pCharacterMove->who == '1')
 	{
-		char guest[2] = { '1', '0' }; // 좌
-		BroadcastPacket(SerializeBuffer(sizeof(PacketS2C_CharacterMove), S2C_CHARACTER_MOVE, guest), sizeof(PacketS2C_CharacterMove));
+		PacketS2C_CharacterMove cm;
+		cm.who = '1';		// clinent
+		cm.direction = '0';	// z축으로
+
+		session->PushSendQueue(
+			SerializeBuffer(sizeof(PacketS2C_CharacterMove), S2C_CHARACTER_MOVE, &cm.who), sizeof(PacketS2C_CharacterMove));
+		//BroadcastPacket(SerializeBuffer(sizeof(PacketS2C_CharacterMove), S2C_CHARACTER_MOVE, &cm.who), sizeof(PacketS2C_CharacterMove));
 	}
+}
+
+void ServerNetworkManager::EndAction(std::shared_ptr<Session> session, char* pMsg)
+{
+	session->SetEndState(true);
 }
 
 // 모두가 Ready인지 체크
@@ -457,6 +475,37 @@ void ServerNetworkManager::IsAllReady()
 		if (pSession == nullptr) return;
 
 		pSession->SetReadyState(false);
+	}
+}
+
+void ServerNetworkManager::IsAllEnd()
+{
+	for (auto& pClient : m_peerClients)
+	{
+		if (pClient == nullptr)
+		{
+			continue;
+		}
+		else
+		{
+			std::shared_ptr<ClientSocket> soc = pClient->GetSocket();
+			std::shared_ptr<Session> pSession = m_sessions[pClient->GetSessionId()];
+
+			if (pSession == nullptr) return;
+			if (!pSession->GetEndState()) return;
+		}
+	}
+
+	BroadcastPacket(SerializeBuffer(sizeof(PacketS2C_EndAction), S2C_END_ACTION, nullptr), sizeof(PacketS2C_EndAction));
+
+	for (auto& pClient : m_peerClients)
+	{
+		std::shared_ptr<ClientSocket> soc = pClient->GetSocket();
+		std::shared_ptr<Session> pSession = m_sessions[pClient->GetSessionId()];
+
+		if (pSession == nullptr) return;
+
+		pSession->SetEndState(false);
 	}
 }
 

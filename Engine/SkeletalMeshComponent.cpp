@@ -3,11 +3,20 @@
 
 #include "CommonApp.h"
 #include "../D3DRenderer/SkeletalMeshModel.h"
+#include "../D3DRenderer/Material.h"
+#include "../D3DRenderer/ResourceManager.h"
 
 SkeletalMeshComponent::~SkeletalMeshComponent()
 {
 	m_skeletalMeshModel.reset();
 	m_animationMap.clear();
+}
+
+Material* SkeletalMeshComponent::SetMaterial(Material* material, int instanceNumber)
+{
+	Material* prevMaterial = m_skeletalMeshModel->GetMaterial(instanceNumber);
+	m_skeletalMeshModel->SetInstanceMaterial(material, instanceNumber);
+	return prevMaterial;
 }
 
 void SkeletalMeshComponent::SetDefaultAnimation(std::string_view filePath)
@@ -30,6 +39,9 @@ void SkeletalMeshComponent::ChangeAnimation(std::string name)
 
 	// 다음 index 가지고 노드에 애니메이션 바인딩
 	m_skeletalMeshModel->ChangeBoneAnimationReference(m_animationIndex);
+	
+	// 애니메이션에 해당사항 없는 Bone의 localTrnasform 초기화
+	m_skeletalMeshModel->SettingBindposeMatrix();
 
 	// 애니메이션 바뀌었다는 트리거
 	m_bAnimChanged = true;

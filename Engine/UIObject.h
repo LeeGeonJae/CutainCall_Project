@@ -16,7 +16,9 @@ public:
 	const Math::Vector2& GetPosition() const { return m_position; }
 	const Math::Vector2& GetScale() const { return m_scale; }
 	const Math::Matrix& GetWorldMatrix() const { return m_worldMatrix; }
+	const std::vector<std::shared_ptr<UIObject>>& GetChildren() const { return m_children; }
 	std::weak_ptr<UIObject> GetParent() { return m_parent; }
+	bool IsHovered() const { return m_isHovered; }
 
 public:
 	virtual void SetMouseHoverFunctor(std::weak_ptr<UIHoverFunctor> functor) {
@@ -30,9 +32,15 @@ public:
 	void SetPosition(const Math::Vector2& position) { m_position = position; }
 	void SetScale(const Math::Vector2& scale) { m_scale = scale; }
 
-	void SetTexturePath(std::wstring_view path) { m_texturePath = path; }
+	void SetTexturePath(std::wstring path) { m_texturePath = path; }
+	std::wstring GetTexturePath() { return m_texturePath; }
 
 	void SetVisible(bool isVisible) { m_bVisible = isVisible; }
+	// 자식까지 Visible 세팅해주기
+	void SetAllVisible(bool isVisible);
+	bool GetVisible() { return m_bVisible; }
+
+	void SetHovered(bool hovered) { m_isHovered = hovered; }
 
 	// 임시 추가 : UIInstance에 KeyFrame전달해주기 위한 함수
 	void AddKeyFrame(CB_UIAnimationKeyframe animationKeyFrame) { m_uiInstance->AddKeyframe(animationKeyFrame); }
@@ -44,6 +52,7 @@ public:
 	void RemoveChild(std::shared_ptr<UIObject> child);
 
 	void ExecuteHoverFunctors(float deltaTime);
+	void ExecuteHoverOutFunctors(float deltaTime);
 	void ExecuteClickFunctors(float deltaTime);
 
 	virtual void Initialize();
@@ -61,7 +70,8 @@ protected:
 	std::weak_ptr<UIObject> m_parent;
 	std::vector<std::shared_ptr<UIObject>> m_children;
 
-	bool m_bVisible;
+	bool m_bVisible = false;
+	bool m_isHovered;
 
 	Math::Vector2 m_size;
 	Math::Vector2 m_position;

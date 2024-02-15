@@ -3,6 +3,7 @@
 
 #include "CommonApp.h"
 
+#include <Winsock2.h>
 
 WorldManager::WorldManager()
 {
@@ -79,28 +80,35 @@ void WorldManager::Finalize()
 }
 
 // Serialize 진행하기
-char* WorldManager::SerializeBuffer(int size, EPacketId id, char* msg)
+char* WorldManager::SerializeBuffer(short size, EPacketId id, char* msg)
 {
-	if (size <= PACKETID_START || size >= PACKETID_END)
+	if (id <= PACKETID_START || id >= PACKETID_END)
 		return nullptr;
 
-	char* buf = new char[size + 1];
+	char* buf = new char[SND_BUF_SIZE];
 
-	buf[0] = size / 10 + '0';
-	buf[1] = size % 10 + '0';
-	buf[2] = id / 10 + '0';
-	buf[3] = id % 10 + '0';
+	PacketHeader ph;
+	ph.size = size;
+	ph.id = id;
+
+	memcpy(buf, &ph, sizeof(PacketHeader));
 
 	if (msg == nullptr)
 		return buf;
 
-	memcpy(buf + 4, msg, size - 4);
+	memcpy(buf + sizeof(PacketHeader), msg, size - sizeof(PacketHeader));
 
 	return buf;
 }
 
 void WorldManager::DeSerializeBuffer(PacketHeader& packet, char* buf)
 {
-	packet.size = (buf[0] - '0') * 10 + (buf[1] - '0') % 10;
-	packet.id = static_cast<EPacketId>((buf[2] - '0') * 10 + (buf[3] - '0') % 10);
+	short sizeInfo = 0;
+	memcpy(&sizeInfo, buf, sizeof(short));
+
+	EPacketId idInfo;
+	memcpy(&idInfo, buf + sizeof(short), sizeof(EPacketId));
+
+	packet.size = sizeInfo;
+	packet.id = idInfo;
 }

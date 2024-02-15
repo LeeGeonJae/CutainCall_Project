@@ -7,10 +7,10 @@ void CubeMapObject::Initialize()
 {
 	m_environmentComponent = CreateComponent<EnvironmentComponent>("environment").lock();
 	m_environmentComponent->SetSceneFilePath("../Resources/FBX/EnvironmentCube.fbx");
-	m_environmentComponent->SetEnvironmentTexturePath(L"../Resources/Textures/BakerSampleEnvHDR.dds");
-	m_environmentComponent->SetIBLDiffuseTexturePath(L"../Resources/Textures/BakerSampleDiffuseHDR.dds");
-	m_environmentComponent->SetIBLSpecularTexturePath(L"../Resources/Textures/BakerSampleSpecularHDR.dds");
-	m_environmentComponent->SetIBLBRDFTexturePath(L"../Resources/Textures/BakerSampleBRDF.dds");
+	m_environmentComponent->SetEnvironmentTexturePath(L"../Resources/Textures/SpaceSkyBoxEnvHDR.dds");
+	m_environmentComponent->SetIBLDiffuseTexturePath(L"../Resources/Textures/SpaceSkyBoxDiffuseHDR.dds");
+	m_environmentComponent->SetIBLSpecularTexturePath(L"../Resources/Textures/SpaceSkyBoxSpecularHDR.dds");
+	m_environmentComponent->SetIBLBRDFTexturePath(L"../Resources/Textures/SpaceSkyBoxBrdf.dds");
 	m_environmentComponent->SetLocalScale(Vector3(100.f, 100.f, 100.f));
 
 	GameObject::Initialize();

@@ -10,6 +10,7 @@ UIInstance::UIInstance()
 	, m_nCurrentAnimationIndex(0)
 	, m_DurationTime(0)
 	, m_AnimationTime(0.2)
+	, m_FadeDelTaTime(0)
 {
 }
 
@@ -36,13 +37,33 @@ void UIInstance::Update(float deltaTime)
 	m_DurationTime += deltaTime;
 }
 
+void UIInstance::UpdateFadeInOut(float deltaTime)
+{
+	// 재현 :: In Out 구분하는 코드는 hlsl 파일 안에 있음.
+	//	밝기 속도 조절하려면 SetFadeDurationTime 함수 사용
+
+	if (m_bIsPlayingFade == true)
+	{
+		m_FadeDelTaTime += deltaTime;
+		if (m_FadeDelTaTime >= m_FadeInOut.durationTime)
+		{
+			m_FadeDelTaTime = 0;
+			m_bIsPlayingFade = false;
+			m_FadeInOut.UseFadeIn = false;
+			m_FadeInOut.UseFadeOut = false;
+		}
+	}
+}
+
 void UIInstance::Render(ID3D11DeviceContext* deviceContext)
 {
-	if (IsRender())
+	if (GetIsRender())
 	{
 		deviceContext->IASetVertexBuffers(0, 1, m_UIMesh->GetVertexBuffer().GetAddressOf(), m_UIMesh->GetVertexBufferStride(), m_UIMesh->GetVertexBufferOffset());
 		deviceContext->IASetIndexBuffer(m_UIMesh->GetIndexBuffer().Get(), DXGI_FORMAT_R32_UINT, 0);
-		deviceContext->PSSetShaderResources(0, 1, m_Texture->GetTexture().GetAddressOf());
+
+		if (m_Texture != nullptr)
+			deviceContext->PSSetShaderResources(0, 1, m_Texture->GetTexture().GetAddressOf());
 
 		deviceContext->DrawIndexed(m_UIMesh->GetIndexCount(), 0, 0);
 	}
@@ -74,7 +95,7 @@ void UIInstance::UIAnimationPlay(CB_UIAnimationKeyframe& animationKeyFrame)
 	{
 		m_DurationTime -= animationTime;
 		m_nCurrentAnimationIndex++;
-
+	
 		if (m_nCurrentAnimationIndex >= m_KeyFrame.size())
 			m_nCurrentAnimationIndex = 0;
 	}
@@ -82,6 +103,13 @@ void UIInstance::UIAnimationPlay(CB_UIAnimationKeyframe& animationKeyFrame)
 	animationKeyFrame.m_Offset = m_KeyFrame[m_nCurrentAnimationIndex].m_Offset;
 	animationKeyFrame.m_Size = m_KeyFrame[m_nCurrentAnimationIndex].m_Size;
 	animationKeyFrame.m_TextureSize = m_KeyFrame[m_nCurrentAnimationIndex].m_TextureSize;
+}
 
-
+void UIInstance::UIFadeInOut(CB_FadeInOut& fadeInOut)
+{	
+	fadeInOut.IsFade = m_FadeInOut.IsFade;
+	fadeInOut.UseFadeOut = m_FadeInOut.UseFadeOut;
+	fadeInOut.UseFadeIn  = m_FadeInOut.UseFadeIn;
+	fadeInOut.durationTime = m_FadeInOut.durationTime;
+	fadeInOut.fadeDeltaTime = m_FadeDelTaTime;
 }

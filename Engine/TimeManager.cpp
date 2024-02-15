@@ -13,10 +13,10 @@ void TimeManager::Update()
 	m_deltaTime = static_cast<float>(m_endCounter.QuadPart - m_startCounter.QuadPart) / m_frequency.QuadPart;
 	m_startCounter = m_endCounter;
 
-//#ifdef _DEBUG
-//	if (m_deltaTime > (1.f / 60.f))
-//		m_deltaTime = (1.f / 60.f);
-//#endif
+#ifdef _DEBUG
+	if (m_deltaTime > (1.f / 60.f))
+		m_deltaTime = (1.f / 60.f);
+#endif
 }
 
 float TimeManager::GetDeltaTime() const

@@ -14,8 +14,11 @@ void TestWorld2::Update(float deltaTime)
 {
 	World::Update(deltaTime);
 
-	if (GetAsyncKeyState(VK_LEFT) & 0x8000)
+	if (GetAsyncKeyState(VK_F1) & 0x8000)
 		EventManager::GetInstance()->SendEvent(eEventType::CHANGE_WORLD, this, eWorldType::TEST);
+
+	if (GetAsyncKeyState(VK_F3) & 0x8000)
+		EventManager::GetInstance()->SendEvent(eEventType::CHANGE_WORLD, this, eWorldType::TEST3);
 }
 
 void TestWorld2::OnEnter()
