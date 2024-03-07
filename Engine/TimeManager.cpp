@@ -36,7 +36,6 @@ float TimeManager::GetFrameRate() const
 
     timeElapsed += m_deltaTime;
 
-    // e델타타임 계속 똑같은 값 나오느 ㄴ 거 같은데
     if (timeElapsed >= 1.0f)
     {
         fps = static_cast<float>(frameCnt);

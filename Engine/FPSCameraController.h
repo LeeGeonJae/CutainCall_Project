@@ -17,12 +17,18 @@ private:
 	void AddPitch(const float value);
 	void AddYaw(const float value);
 
+	// 재현
+	void SetLookTarget(bool isLookTarget);
+
 private:
 	float m_rotationSpeed = 0.004f;
-	float m_movementSpeed = 300.f;
+	float m_movementSpeed = 1000.f;
 
 	Math::Vector3 m_InputVector;
 	float m_pitch = 0.0f; // radian
 	float m_yaw = 0.0f;
+
+	// 재현
+	bool m_bIsLookTarget = false;
 };
 

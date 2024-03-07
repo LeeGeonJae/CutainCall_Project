@@ -1,11 +1,18 @@
 #include "pch.h"
 #include "RigidDynamicComponent.h"
 #include "PhysicsManager.h"
+#include "GameObject.h"
 
-PxRigidDynamic* RigidDynamicComponent::CreateDynamicRigidBody(Geometry geometryType, const std::vector<float>& geometryArgs, const std::vector<float>& materialArgs, float density, bool isTrigger)
+RigidDynamicComponent::~RigidDynamicComponent()
 {
-	GetOwnerTrasnform();
+	PhysicsManager::GetInstance()->RemoveCollisionHandler(m_rigidDynamic);
+	PhysicsManager::GetInstance()->RemoveCollisionOwner(m_rigidDynamic);
+	m_rigidDynamic->release();
+	PhysicsManager::GetInstance()->RemoveRigidDynamicComponent(this);
+}
 
+PxRigidDynamic* RigidDynamicComponent::CreateDynamicRigidBody(Geometry geometryType, const std::vector<float>& geometryArgs, const std::vector<float>& materialArgs, float density, const Math::Vector3& offsetTrasnform, const Math::Vector3& offsetRotation, bool isTrigger)
+{
 	std::shared_ptr<PxGeometry> geometry;
 	switch (geometryType)
 	{
@@ -42,7 +49,6 @@ PxRigidDynamic* RigidDynamicComponent::CreateDynamicRigidBody(Geometry geometryT
 		return nullptr;
 
 	}
-
 	SetCollisionFilter(m_rigidDynamic);
 
 	PxShape* sensorShape;
@@ -53,6 +59,21 @@ PxRigidDynamic* RigidDynamicComponent::CreateDynamicRigidBody(Geometry geometryT
 		m_rigidDynamic->getShapes(&sensorShape, 1);
 		sensorShape->setFlag(PxShapeFlag::eSIMULATION_SHAPE, false);
 		sensorShape->setFlag(PxShapeFlag::eTRIGGER_SHAPE, true);
+	}
+
+	if (offsetTrasnform != Math::Vector3(0.f, 0.f, 0.f)
+		|| offsetRotation != Math::Vector3(0.f, 0.f, 0.f))
+	{
+		auto quat = Math::Quaternion::CreateFromYawPitchRoll(XMConvertToRadians(offsetRotation.y), XMConvertToRadians(offsetRotation.x), XMConvertToRadians(offsetRotation.z));
+
+		sensorShape->setLocalPose(PxTransform(physx::PxVec3T(offsetTrasnform.x, offsetTrasnform.y, offsetTrasnform.z), physx::PxQuat(quat.x, quat.y, quat.z, quat.w)));
+	}
+
+	if (geometryType == Geometry::Capsule)
+	{
+		PxTransform relativePose(PxQuat(PxHalfPi, PxVec3(0, 0, 1)));
+		sensorShape->setLocalPose(relativePose);
+		PxRigidBodyExt::updateMassAndInertia(*m_rigidDynamic, density);
 	}
 
 #ifdef _DEBUG
@@ -137,9 +158,24 @@ void RigidDynamicComponent::SetLockFlags(PxRigidDynamicLockFlags flags)
 	m_rigidDynamic->setRigidDynamicLockFlags(flags);
 }
 
+void RigidDynamicComponent::SetTransform(Math::Matrix& worldMatrix)
+{
+	PxTransform newTransform;
+
+	Math::Vector3 position;
+	Math::Vector3 scale;
+	Quaternion rotationQuat;
+	worldMatrix.Decompose(scale, rotationQuat, position);
+
+	newTransform.p = PxVec3(position.x, position.y, position.z);
+	newTransform.q = PxQuat(rotationQuat.x, rotationQuat.y, rotationQuat.z, rotationQuat.w);
+
+	m_rigidDynamic->setGlobalPose(newTransform);
+}
+
 void RigidDynamicComponent::Initialize()
 {
-	PhysicsManager::GetInstance()->AddRigidDynamicComponent(shared_from_this());
+	PhysicsManager::GetInstance()->AddRigidDynamicComponent(this);
 	//m_rigidDynamic->setAngularDamping(0.5f);
 	PhysicsManager::GetInstance()->GetScene()->addActor(*m_rigidDynamic);
 }
@@ -147,6 +183,9 @@ void RigidDynamicComponent::Initialize()
 void RigidDynamicComponent::Update(float deltaTime)
 {
 	PxTransform tf = m_rigidDynamic->getGlobalPose();
-	*m_pOwnerPosition = { tf.p.x, tf.p.y, tf.p.z };
-	*m_pOwnerRotation = Math::Quaternion(tf.q.x, tf.q.y, tf.q.z, tf.q.w).ToEuler();
+
+	auto euler = Math::Quaternion(tf.q.x, tf.q.y, tf.q.z, tf.q.w).ToEuler();
+
+	m_pOwner.lock()->SetPosition({ tf.p.x, tf.p.y, tf.p.z });
+	m_pOwner.lock()->SetRotation({ XMConvertToDegrees(euler.x), XMConvertToDegrees(euler.y), XMConvertToDegrees(euler.z) });
 }

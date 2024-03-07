@@ -67,6 +67,7 @@ void TextRenderer::RenderString(std::wstring_view text, FLOAT x, FLOAT y, D2D1::
 			textLayoutKey.fontStretch
 		);
 
+
 		HR_T(m_pdWriteFactory->CreateTextLayout(
 			text.data(),
 			wcslen(text.data()),

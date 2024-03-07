@@ -25,6 +25,7 @@ void ParticleComponent::Initialize()
 	m_pParticleSystem->SetParticleLifeTime(m_ParticleInfo.LifeTime);
 	m_pParticleSystem->SetParticleSize(m_ParticleInfo.Size);
 	m_pParticleSystem->SetEmitGenerationRange(m_ParticleInfo.GenerationRange);
+	m_pParticleSystem->SetParticleDirection(m_ParticleInfo.ParticleDirection);
 	m_pParticleSystem->Init(m_ParticleInfo.m_TexturePath
 		, m_ParticleInfo.CreatePerSecond * m_ParticleInfo.LifeTime * 1.5f
 		, m_ParticleInfo.m_ParticleType
@@ -48,7 +49,7 @@ void ParticleComponent::Update(float deltaTime)
 }
 
 
-/// 해당 Particle이 IsLoop가 아닐 때 파티클 실행 함수 /// 
+/// 해당 Particle이 IsLoop가 아닐 때 파티클 실행 함수 ///
 void ParticleComponent::PlayParticle(float particlePlayTime)
 {
 	m_DurationTime = 0.f;
@@ -58,8 +59,9 @@ void ParticleComponent::PlayParticle(float particlePlayTime)
 }
 
 
-/// Particle Stop 함수 ///
-void ParticleComponent::StopParticle()
+/// Particle Play, Stop 함수 ///
+void ParticleComponent::PlayParticle(bool isPlaying)
 {
-	m_pParticleSystem->SetPlayParticle(false);
+	m_pParticleSystem->SetPlayParticle(isPlaying);
+	m_pParticleSystem->Reset();
 }

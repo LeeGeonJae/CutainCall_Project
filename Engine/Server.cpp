@@ -84,7 +84,7 @@ void ServerNetworkManager::Update()
 
 	if (wsaEvents[index] == m_pListenSocket->GetEvent())
 		pSocket = m_pListenSocket;
-	else 
+	else
 		pSocket = m_peerClients[index - 1]->GetSocket();
 
 	WSANETWORKEVENTS networkEvents;
@@ -279,26 +279,43 @@ void ServerNetworkManager::CheckId(std::shared_ptr<Session> session, char* pData
 
 	switch (pHeader.id)
 	{
+	case C2S_IS_ALL_GOAL:
+		IsAllGoalIn(session, pData);
+		break;
+
+	case C2S_IS_ALL_END:
+		IsAllGoalEnd(session, pData);
+		break;
+
+	case C2S_IS_ALL_ENTER:
+		ClientSetEnter(session, pData);
+		IsAllEnter();
+		break;
+	
 	case C2S_READY:
 		ClientSetReady(session, pData);
-		IsAllReady();
+		//IsAllReady();
 		break;
 
 	case C2S_IAM_HOST_MSG:
 		session->SetHostSession();
 		break;
 
+	case C2S_BROADCAST_ACTION:
+		BroadcastAction(session, pData);
+		break;
+
 	case C2S_SET_TURN:
 		SetTurn(session, pData);
 		break;
 
-	case C2S_END_TURN:
-		EndTurn(session, pData);
+	case C2S_MOVEMENT_END:
+		MovementEnd(session, pData);
 		break;
 
-	case C2S_CHANGE_TURN:
+	/*case C2S_CHANGE_TURN:
 		ChangeTurn();
-		break;
+		break;*/
 
 	case C2S_START_TURN:
 		StartTurn(session, pData);
@@ -308,19 +325,14 @@ void ServerNetworkManager::CheckId(std::shared_ptr<Session> session, char* pData
 		BroadcastCheckAction();
 		break;
 
+	case C2S_RESTART_GAME:
+		CheckRestartState(session, pData);
+		break;
+
 	case C2S_BROADCAST_MSG:
 		BroadcastMsg(session, pData);
 		break;
 
-	case C2S_CHARACTER_MOVE:
-		SendCharacterPosition(session, pData);
-		break;
-
-	case C2S_END_ACTION:
-		EndAction(session, pData);
-		IsAllEnd();
-		break;
-	
 	default:
 		break;
 	}
@@ -331,7 +343,7 @@ void ServerNetworkManager::BroadcastPacket(char* pData, int len)
 	for (auto& session : m_sessions)
 	{
 		char* sendData = new char[SND_BUF_SIZE];
-		if(pData != nullptr)
+		if (pData != nullptr)
 			memcpy(sendData, pData, SND_BUF_SIZE);
 		session.second->PushSendQueue(sendData, len);
 	}
@@ -344,17 +356,134 @@ void ServerNetworkManager::BroadcastMsg(std::shared_ptr<Session> session, char* 
 	BroadcastPacket(SerializeBuffer(sizeof(PacketS2C_BroadcastMsg), S2C_BROADCAST_MSG, broadcastMsg), sizeof(PacketS2C_BroadcastMsg));
 }
 
+void ServerNetworkManager::ClientSetEnter(std::shared_ptr<Session> session, char* pMsg)
+{
+	session->SetEnterState(true);
+}
+
+void ServerNetworkManager::IsAllGoalIn(std::shared_ptr<Session> session, char* pMsg)
+{
+	if (m_peerClients.size() <= 1)
+		return;
+
+	session->SetGoalIn(true);
+
+	for (auto& pClient : m_peerClients)
+	{
+		if (pClient == nullptr)
+		{
+			continue;
+		}
+		else
+		{
+			std::shared_ptr<ClientSocket> soc = pClient->GetSocket();
+			std::shared_ptr<Session> pSession = m_sessions[pClient->GetSessionId()];
+
+			if (pSession == nullptr) return;
+			if (!pSession->GetGoalIn())	return;
+		}
+	}
+
+	BroadcastPacket(SerializeBuffer(sizeof(PacketS2C_IsAllGoal), S2C_IS_ALL_GOAL, nullptr), sizeof(PacketS2C_IsAllGoal));
+
+	for (auto& pClient : m_peerClients)
+	{
+		std::shared_ptr<ClientSocket> soc = pClient->GetSocket();
+		std::shared_ptr<Session> pSession = m_sessions[pClient->GetSessionId()];
+
+		if (pSession == nullptr) return;
+
+		pSession->SetGoalIn(false);
+	}
+
+}
+
+void ServerNetworkManager::IsAllGoalEnd(std::shared_ptr<Session> session, char* pMsg)
+{
+	if (m_peerClients.size() <= 1)
+		return;
+
+	session->SetGoalEnd(true);
+
+	for (auto& pClient : m_peerClients)
+	{
+		if (pClient == nullptr)
+		{
+			continue;
+		}
+		else
+		{
+			std::shared_ptr<ClientSocket> soc = pClient->GetSocket();
+			std::shared_ptr<Session> pSession = m_sessions[pClient->GetSessionId()];
+
+			if (pSession == nullptr) return;
+			if (!pSession->GetGoalEnd())	return;
+		}
+	}
+
+	BroadcastPacket(SerializeBuffer(sizeof(PacketS2C_IsAllEnd), S2C_IS_ALL_END, nullptr), sizeof(PacketS2C_IsAllEnd));
+
+	for (auto& pClient : m_peerClients)
+	{
+		std::shared_ptr<ClientSocket> soc = pClient->GetSocket();
+		std::shared_ptr<Session> pSession = m_sessions[pClient->GetSessionId()];
+
+		if (pSession == nullptr) return;
+
+		pSession->SetGoalEnd(false);
+	}
+
+}
+
 void ServerNetworkManager::ClientSetReady(std::shared_ptr<Session> session, char* pMsg)
 {
+	if (m_peerClients.size() <= 1)
+		return;
+
 	PacketC2S_READY* pSetReady = reinterpret_cast<PacketC2S_READY*>(pMsg);
 	assert(pSetReady != nullptr);
 
-	// 레디 풀기
-	if (pSetReady->clickedReady - '0' == 0)
-		session->SetReadyState(false);
-	// 레디 하기
-	else
-		session->SetReadyState(true);
+	session->SetReady(true, true);
+
+	// 세션 다 들어왔는지 확인
+	for (auto& pClient : m_peerClients)
+	{
+		std::shared_ptr<ClientSocket> soc = pClient->GetSocket();
+		std::shared_ptr<Session> pSession = m_sessions[pClient->GetSessionId()];
+		if (pClient == nullptr)	return;
+		else
+		{
+			// 서버에 안 들어온게 있다면
+			if (!pSession->GetReady().bserverEnter) return;
+		}
+	}
+
+	BroadcastPacket(SerializeBuffer(sizeof(PacketS2C_IsAllReady), S2C_IS_ALL_READY, nullptr), sizeof(PacketS2C_IsAllReady));
+
+	// 다 들어왔는지 체크 됐으면 false로 바꿔주기
+	for (auto& pClient : m_peerClients)
+	{
+		std::shared_ptr<ClientSocket> soc = pClient->GetSocket();
+		std::shared_ptr<Session> pSession = m_sessions[pClient->GetSessionId()];
+		if (pClient == nullptr)	return;
+		else
+		{
+			pSession->SetReady(false, false);
+		}
+	}	
+}
+
+void ServerNetworkManager::BroadcastAction(std::shared_ptr<Session> session, char* pMsg)
+{
+	PacketC2S_BroadcastAction* pBroadcastAction = reinterpret_cast<PacketC2S_BroadcastAction*>(pMsg);
+
+	PacketS2C_BroadcastAction ba;
+	ba.who = pBroadcastAction->who;
+	for (int i = 0; i < 4; i++)
+	{
+		ba.action[i] = pBroadcastAction->action[i];
+	}
+	BroadcastPacket(SerializeBuffer(sizeof(PacketS2C_BroadcastAction), S2C_BROADCAST_ACTION, &ba.who), sizeof(PacketS2C_BroadcastAction));
 }
 
 void ServerNetworkManager::SetTurn(std::shared_ptr<Session> session, char* pMsg)
@@ -364,41 +493,140 @@ void ServerNetworkManager::SetTurn(std::shared_ptr<Session> session, char* pMsg)
 
 	if (pSetTurn->who == '0') // 호스트 턴
 	{
-		PacketS2C_SetTurn st;
-		st.setTurn = '0';
-		session->PushSendQueue(
-			SerializeBuffer(sizeof(PacketS2C_SetTurn), S2C_SET_TURN, &st.setTurn),
-			sizeof(PacketS2C_SetTurn));
+		session->SetSessionTurn('0', true);
 	}
 	else if (pSetTurn->who == '1') // 세션이 게스트면 게스트한테 턴 세팅해주기
 	{
-		PacketS2C_SetTurn st;
-		st.setTurn = '1';
-		session->PushSendQueue(
-			SerializeBuffer(sizeof(PacketS2C_SetTurn), S2C_SET_TURN, &st.setTurn),
+		session->SetSessionTurn('1', true);
+	}
+	
+	if (m_peerClients.size() <= 1)
+		return;
+
+	// 세션 다 들어왔는지 확인
+	for (auto& pClient : m_peerClients)
+	{
+		std::shared_ptr<ClientSocket> soc = pClient->GetSocket();
+		std::shared_ptr<Session> pSession = m_sessions[pClient->GetSessionId()];
+		if (pClient == nullptr)	return;
+		else
+		{
+			// 서버에 안 들어온게 있다면
+			if (!pSession->GetSessionTurn().bserverEnter) return;
+		}
+	}
+
+	// 세션이 다 들어왔으면 브로드캐스트
+	PacketS2C_SetTurn st;
+	
+	st.setTurn = session->GetSessionTurn().bHost;
+
+	BroadcastPacket(SerializeBuffer(sizeof(PacketS2C_SetTurn), S2C_SET_TURN, &st.setTurn),
 			sizeof(PacketS2C_SetTurn));
+
+	// 다 들어왔는지 체크 됐으면 false로 바꿔주기
+	for (auto& pClient : m_peerClients)
+	{
+		std::shared_ptr<ClientSocket> soc = pClient->GetSocket();
+		std::shared_ptr<Session> pSession = m_sessions[pClient->GetSessionId()];
+		if (pClient == nullptr)	return;
+		else
+		{
+			pSession->SetSessionTurn('0', false);
+		}
 	}
 }
 
-void ServerNetworkManager::EndTurn(std::shared_ptr<Session> session, char* pMsg)
+// 플레이어의 행동이 끝났는지 확인
+void ServerNetworkManager::MovementEnd(std::shared_ptr<Session> session, char* pMsg)
 {
-	session->PushSendQueue(
-		SerializeBuffer(sizeof(PacketS2C_EndTurn), S2C_END_TURN, nullptr),
-		sizeof(PacketS2C_EndTurn));
+	// 움직임 끝난게 호스트 플레이어인지 게스트 플레이어인지
+	PacketC2S_MovementEnd* pMovementEnd = reinterpret_cast<PacketC2S_MovementEnd*>(pMsg);
+	if(pMovementEnd->who == '0')
+		session->SetMovement(true);
+	else if(pMovementEnd->who == '1')
+		session->SetMovement(false);
+
+	// 한 세션의 플레이어들이 다 움직였다
+	if (session->GetAllMovementEnd())
+	{
+		session->SetMovementFalse();
+		session->SetSessionMovementEnd(true);
+	}
+
+	for (auto& pClient : m_peerClients)
+	{
+		std::shared_ptr<ClientSocket> soc = pClient->GetSocket();
+		std::shared_ptr<Session> pSession = m_sessions[pClient->GetSessionId()];
+		if (pClient == nullptr)	return;
+		else
+		{
+			// 아직 플레이어의 움직임이 끝나지 않은 곳이 있다면 return
+			if (!pSession->GetSessionMovementEnd()) return;
+		}
+	}
+
+	BroadcastPacket(SerializeBuffer(sizeof(PacketS2C_MovementEnd), S2C_MOVEMENT_END, nullptr),
+		sizeof(PacketS2C_MovementEnd));
+
+	// MovementEnd 초기화
+	for (auto& pClient : m_peerClients)
+	{
+		std::shared_ptr<ClientSocket> soc = pClient->GetSocket();
+		std::shared_ptr<Session> pSession = m_sessions[pClient->GetSessionId()];
+		if (pClient == nullptr)	return;
+		else
+		{
+			// 아직 플레이어의 움직임이 끝나지 않은 곳이 있다면 return
+			pSession->SetSessionMovementEnd(false);
+		}
+	}
 }
 
 void ServerNetworkManager::ChangeTurn()
 {
-	BroadcastPacket(SerializeBuffer(sizeof(PacketS2C_ChangeTurn), S2C_CHANGE_TURN, nullptr), sizeof(PacketS2C_ChangeTurn));
+	/*static short sessionCnt = 0;
+	sessionCnt++;
+	if (sessionCnt == 2)
+	{
+		BroadcastPacket(SerializeBuffer(sizeof(PacketS2C_ChangeTurn), S2C_CHANGE_TURN, nullptr), sizeof(PacketS2C_ChangeTurn));
+		sessionCnt = 0;
+	}*/
 }
 
 void ServerNetworkManager::StartTurn(std::shared_ptr<Session> session, char* pMsg)
 {
 	/*session->PushSendQueue(
-		SerializeBuffer(sizeof(PacketS2C_StartGame), S2C_START_GAME, nullptr),
+		SerializeBuffer(sizeof(PacketS2C_StartGame), S2C_START_TURN, nullptr),
 		sizeof(PacketS2C_StartGame));*/
+	session->SetStartTurn(true);
+
+	for (auto& pClient : m_peerClients)
+	{
+		std::shared_ptr<ClientSocket> soc = pClient->GetSocket();
+		std::shared_ptr<Session> pSession = m_sessions[pClient->GetSessionId()];
+		if (pClient == nullptr)	return;
+		else
+		{
+			// 서버에 안 들어온게 있다면
+			if (!pSession->GetStartTurn().bserverEnter) return;
+		}
+	}
+
 	BroadcastPacket(SerializeBuffer(sizeof(PacketS2C_StartGame), S2C_START_TURN, nullptr),
 		sizeof(PacketS2C_StartGame));
+
+	// 다 들어왔는지 체크 됐으면 false로 바꿔주기
+	for (auto& pClient : m_peerClients)
+	{
+		std::shared_ptr<ClientSocket> soc = pClient->GetSocket();
+		std::shared_ptr<Session> pSession = m_sessions[pClient->GetSessionId()];
+		if (pClient == nullptr)	return;
+		else
+		{
+			pSession->SetStartTurn(false);
+		}
+	}
 }
 
 void ServerNetworkManager::BroadcastCheckAction()
@@ -406,43 +634,75 @@ void ServerNetworkManager::BroadcastCheckAction()
 	BroadcastPacket(SerializeBuffer(sizeof(PacketS2C_CheckAction), S2C_CHECK_ACTION, nullptr), sizeof(PacketS2C_CheckAction));
 }
 
-void ServerNetworkManager::SendCharacterPosition(std::shared_ptr<Session> session, char* pMsg)
+void ServerNetworkManager::CheckRestartState(std::shared_ptr<Session> session, char* pMsg)
 {
-	PacketC2S_CharacterMove* pCharacterMove = reinterpret_cast<PacketC2S_CharacterMove*>(pMsg);
-	assert(pCharacterMove != nullptr);
+	PacketC2S_RestartGame* pRestart = reinterpret_cast<PacketC2S_RestartGame*>(pMsg);
+	assert(pRestart != nullptr);
 
-	// 호스트 서버면
-	if (pCharacterMove->who == '0')
+	PacketS2C_RestartGame rg;
+
+	// 메인화면으로 버튼 눌렀을 때
+	if (pRestart->restart == '0')
 	{
-		PacketS2C_CharacterMove cm;
-		cm.who = '0';		// host
-		cm.direction = '0';	// z축으로
-
-		session->PushSendQueue(
-			SerializeBuffer(sizeof(PacketS2C_CharacterMove), S2C_CHARACTER_MOVE, &cm.who), sizeof(PacketS2C_CharacterMove));
-		//BroadcastPacket(SerializeBuffer(sizeof(PacketS2C_CharacterMove), S2C_CHARACTER_MOVE, &cm.who), sizeof(PacketS2C_CharacterMove));
+		rg.restart = '0';
+		BroadcastPacket(SerializeBuffer(sizeof(PacketS2C_RestartGame), S2C_RESTART_GAME, &rg.restart), sizeof(PacketS2C_RestartGame));
+		session->SetRestart(false, true);
+		return;
 	}
-	// 게스트 서버면
-	else if(pCharacterMove->who == '1')
+	// 다시 시작 눌렀을 때
+	else if (pRestart->restart == '1')
 	{
-		PacketS2C_CharacterMove cm;
-		cm.who = '1';		// clinent
-		cm.direction = '0';	// z축으로
+		session->SetRestart(true, true);
+	}
 
-		session->PushSendQueue(
-			SerializeBuffer(sizeof(PacketS2C_CharacterMove), S2C_CHARACTER_MOVE, &cm.who), sizeof(PacketS2C_CharacterMove));
-		//BroadcastPacket(SerializeBuffer(sizeof(PacketS2C_CharacterMove), S2C_CHARACTER_MOVE, &cm.who), sizeof(PacketS2C_CharacterMove));
+	for (auto& pClient : m_peerClients)
+	{
+		std::shared_ptr<ClientSocket> soc = pClient->GetSocket();
+		std::shared_ptr<Session> pSession = m_sessions[pClient->GetSessionId()];
+		if (pClient == nullptr)	return;
+		else
+		{
+			// 서버에 안 들어온게 있다면
+			if (!pSession->GetReStart().bserverEnter) return;
+		}
+	}
+
+	// 다 들어왔는지 체크 됐으면
+	for (auto& pClient : m_peerClients)
+	{
+		std::shared_ptr<ClientSocket> soc = pClient->GetSocket();
+		std::shared_ptr<Session> pSession = m_sessions[pClient->GetSessionId()];
+		if (pClient == nullptr)	return;
+		else
+		{
+			if (!pSession->GetReStart().restart)
+			{
+				rg.restart = '0';
+				BroadcastPacket(SerializeBuffer(sizeof(PacketS2C_RestartGame), S2C_RESTART_GAME, &rg.restart), sizeof(PacketS2C_RestartGame));
+				return;
+			}
+		}
+	}
+	rg.restart = '1';
+	BroadcastPacket(SerializeBuffer(sizeof(PacketS2C_RestartGame), S2C_RESTART_GAME, &rg.restart), sizeof(PacketS2C_RestartGame));
+
+	for (auto& pClient : m_peerClients)
+	{
+		std::shared_ptr<ClientSocket> soc = pClient->GetSocket();
+		std::shared_ptr<Session> pSession = m_sessions[pClient->GetSessionId()];
+		if (pClient == nullptr)	return;
+		else
+		{
+			pSession->SetRestart(false, false);
+		}
 	}
 }
 
-void ServerNetworkManager::EndAction(std::shared_ptr<Session> session, char* pMsg)
+void ServerNetworkManager::IsAllEnter()
 {
-	session->SetEndState(true);
-}
+	if (m_peerClients.size() <= 1)
+		return;
 
-// 모두가 Ready인지 체크
-void ServerNetworkManager::IsAllReady()
-{
 	for (auto& pClient : m_peerClients)
 	{
 		if (pClient == nullptr)
@@ -455,17 +715,46 @@ void ServerNetworkManager::IsAllReady()
 			std::shared_ptr<Session> pSession = m_sessions[pClient->GetSessionId()];
 
 			if (pSession == nullptr) return;
-			if (!pSession->GetReadyState())
-			{
-				char notReady[sizeof(char)] = { '0' };
-				BroadcastPacket(SerializeBuffer(sizeof(PacketS2C_IsAllReady), S2C_IS_ALL_READY, notReady), sizeof(PacketS2C_IsAllReady));
-				return;
-			}
+			if (!pSession->GetEnterState()) return;
 		}
 	}
 
-	char ready[sizeof(char)] = { '1' };
-	BroadcastPacket(SerializeBuffer(sizeof(PacketS2C_IsAllReady), S2C_IS_ALL_READY, ready), sizeof(PacketS2C_IsAllReady));
+	BroadcastPacket(SerializeBuffer(sizeof(PacketS2C_IsAllEnter), S2C_IS_ALL_ENTER, nullptr), sizeof(PacketS2C_IsAllEnter));
+
+	for (auto& pClient : m_peerClients)
+	{
+		std::shared_ptr<ClientSocket> soc = pClient->GetSocket();
+		std::shared_ptr<Session> pSession = m_sessions[pClient->GetSessionId()];
+
+		if (pSession == nullptr) return;
+
+		pSession->SetEnterState(false);
+	}
+}
+
+// 모두가 Ready인지 체크
+void ServerNetworkManager::IsAllReady()
+{
+	if (m_peerClients.size() <= 1)
+		return;
+
+	for (auto& pClient : m_peerClients)
+	{
+		if (pClient == nullptr)
+		{
+			continue;
+		}
+		else
+		{
+			std::shared_ptr<ClientSocket> soc = pClient->GetSocket();
+			std::shared_ptr<Session> pSession = m_sessions[pClient->GetSessionId()];
+
+			if (pSession == nullptr) return;
+			if (!pSession->GetReadyState())	return;
+		}
+	}
+
+	BroadcastPacket(SerializeBuffer(sizeof(PacketS2C_IsAllReady), S2C_IS_ALL_READY, nullptr), sizeof(PacketS2C_IsAllReady));
 
 	for (auto& pClient : m_peerClients)
 	{
@@ -475,37 +764,6 @@ void ServerNetworkManager::IsAllReady()
 		if (pSession == nullptr) return;
 
 		pSession->SetReadyState(false);
-	}
-}
-
-void ServerNetworkManager::IsAllEnd()
-{
-	for (auto& pClient : m_peerClients)
-	{
-		if (pClient == nullptr)
-		{
-			continue;
-		}
-		else
-		{
-			std::shared_ptr<ClientSocket> soc = pClient->GetSocket();
-			std::shared_ptr<Session> pSession = m_sessions[pClient->GetSessionId()];
-
-			if (pSession == nullptr) return;
-			if (!pSession->GetEndState()) return;
-		}
-	}
-
-	BroadcastPacket(SerializeBuffer(sizeof(PacketS2C_EndAction), S2C_END_ACTION, nullptr), sizeof(PacketS2C_EndAction));
-
-	for (auto& pClient : m_peerClients)
-	{
-		std::shared_ptr<ClientSocket> soc = pClient->GetSocket();
-		std::shared_ptr<Session> pSession = m_sessions[pClient->GetSessionId()];
-
-		if (pSession == nullptr) return;
-
-		pSession->SetEndState(false);
 	}
 }
 

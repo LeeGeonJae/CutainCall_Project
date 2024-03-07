@@ -25,7 +25,9 @@ public:
 		if (!functor.expired()) { auto lockedFunctor = functor.lock(); m_mouseHoverFunctors.push_back(std::move(lockedFunctor)); }
 	}
 	virtual void SetMouseClickFunctor(std::weak_ptr<UIClickFunctor> functor) {
-		if (!functor.expired()) { auto lockedFunctor = functor.lock(); m_mouseClickFunctors.push_back(std::move(lockedFunctor)); }
+		if (!functor.expired()) { auto lockedFunctor = functor.lock(); 
+			m_mouseClickFunctors.push_back(std::move(lockedFunctor));
+		}
 	}
 
 	void SetSize(const Math::Vector2& size) { m_size = size; }
@@ -44,7 +46,8 @@ public:
 
 	// 임시 추가 : UIInstance에 KeyFrame전달해주기 위한 함수
 	void AddKeyFrame(CB_UIAnimationKeyframe animationKeyFrame) { m_uiInstance->AddKeyframe(animationKeyFrame); }
-	std::weak_ptr<UIInstance> GetUIInstance() { return m_uiInstance; }
+
+	std::weak_ptr<UIInstance> GetUIInstance() { if (this == nullptr) return std::weak_ptr<UIInstance>(); return m_uiInstance; }
 
 public:
 	template<typename... Args>

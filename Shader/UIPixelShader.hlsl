@@ -7,15 +7,19 @@ struct PS_INPUT
 cbuffer FadeCB : register(b7)
 {
     float deltaTime;
+    int IsDim;
+    int UseDim;
     int IsFade;
     int UseFadeOut;
     int UseFadeIn;
     float durationTime = 0.0f;
-    float pad[3];
+    float pad;
 }
 
 Texture2D txDiffuse : register(t0);
 SamplerState samLinear : register(s0);
+SamplerState samLinear1 : register(s1);
+SamplerState samLinear2 : register(s2);
 
 float currentTime = 0.0f;
 
@@ -52,6 +56,20 @@ float4 main(PS_INPUT input) : SV_TARGET
             float3 FadeColor = float3(0, 0, 0); // FadeIn ¹× FadeOut »ö»ó
             float4 finalColor = float4(FadeColor, 1 - alpha);
     
+            return finalColor;
+        }
+        
+        discard;
+    }
+    
+    
+    if (IsDim)
+    {
+        if(UseDim)
+        {            
+            float3 DimColor = float3(0, 0, 0);
+            float4 finalColor = float4(DimColor, 0.7f); // alpha
+
             return finalColor;
         }
         

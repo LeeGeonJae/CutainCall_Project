@@ -2,6 +2,7 @@
 
 enum class eBlockType;
 class World;
+class PuzzleWorld;
 struct BlockPOD;
 
 class BlockGenerator
@@ -17,6 +18,6 @@ private:
 
 private:
 	std::vector<std::shared_ptr<BlockPOD>> m_blockPODs;
-	std::weak_ptr<World> m_ownerWorld;
+	PuzzleWorld* m_ownerWorld;
 };
 

@@ -17,11 +17,13 @@ public:
 	// CreateComponent 후 필수적으로 filePath 설정
 	void SetPlaySpeed(float speed) { m_animationPlaySpeed = speed; }
 	void SetPlayerNumber(int playerNumber) { m_PlayerNumber = playerNumber; }
+	void SetOutLine(bool isOutLine);
+	void SetUIMove(bool isUIMove);
 	Material* SetMaterial(Material* material, int instanceNumber);
 
-	void SetDefaultAnimation(std::string_view filePath);
+	void SetDefaultAnimation(std::string_view filePath, bool isLoop = true);
 	void ChangeAnimation(std::string name);
-	void AddAnimation(std::string filePath);
+	void AddAnimation(std::string filePath, bool isLoop);
 
 public:
 	void Initialize() override;	// SkeletalMeshModel을 렌더러를 통해 생성, 받아온다.
@@ -32,7 +34,7 @@ private:
 	std::string m_filePath;
 	std::shared_ptr<SkeletalMeshModel> m_skeletalMeshModel;
 
-
+	bool m_isLoop = true;
 	int  m_animationIndex = 0;
 	float m_animationProgressTime = 0.0f;
 	float m_animationPlaySpeed = 1.f;
@@ -45,4 +47,3 @@ private:
 	// UI용 PlayerNumber
 	int m_PlayerNumber = 0;
 };
-

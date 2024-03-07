@@ -6,14 +6,12 @@
 #include "../Engine/MaterialManagerComponent.h"
 #include "../Engine/ParticleComponent.h"
 
-#include "../Engine/InputManager.h"
-
-
 /// 3DUIMeshComponent, MaterialManagerComponent, ParticleComponent 세팅 에제 코드 ///
 void UIMeshTestObject::Initialize()
 {
 	m_SkeletalTestComponent = CreateComponent<SkeletalMeshComponent>("MaterialTestComponent").lock();
-	m_SkeletalTestComponent->SetDefaultAnimation("../Resources/FBX/BEAR_ANI_BEAR_A.fbx");
+	m_SkeletalTestComponent->SetDefaultAnimation("../Resources/FBX/bear_with_armature.fbx");
+	m_SkeletalTestComponent->SetIsOutLine(true);
 	SetRootComponent(m_SkeletalTestComponent);
 
 	/// Player Mesh UI 컴포넌트 세팅 영역 ///
@@ -21,8 +19,8 @@ void UIMeshTestObject::Initialize()
 		m_PlayerOneMeshComponent = CreateComponent<UIMeshComponent>("UIMeshComponent").lock();
 		m_PlayerTwoMeshComponent = CreateComponent<UIMeshComponent>("UIMeshComponent").lock();
 		m_MaterialManagerComponent = CreateComponent<MaterialManagerComponent>("MaterialManagerTestComponent").lock();
-		m_PlayerOneMeshComponent->SetDefaultAnimation("../Resources/FBX/BEAR_ANI_BEAR_A.fbx");
-		m_PlayerTwoMeshComponent->SetDefaultAnimation("../Resources/FBX/BEAR_ANI_BEAR_A.fbx");
+		m_PlayerOneMeshComponent->SetDefaultAnimation("../Resources/FBX/bear_with_armature.fbx");
+		m_PlayerTwoMeshComponent->SetDefaultAnimation("../Resources/FBX/bear_with_armature.fbx");
 		m_PlayerOneMeshComponent->SetPlayerNumber(1);
 		m_PlayerTwoMeshComponent->SetPlayerNumber(2);
 	}
@@ -79,6 +77,7 @@ void UIMeshTestObject::Initialize()
 		m_FireParticleComponentTwo = CreateComponent<ParticleComponent>("FireParticleComponentTwo").lock();
 		m_FireParticleComponentThree = CreateComponent<ParticleComponent>("FireParticleComponentThree").lock();
 		ParticleComponentInfo info;
+		info.ParticleDirection = 2;
 		info.bIsLoop = true;
 		info.Acceleration = Vector3(0.f, -25.f, 0.f);
 		info.CreatePerSecond = 20.f;
@@ -96,6 +95,7 @@ void UIMeshTestObject::Initialize()
 		info.m_TexturePath = L"../Resources/Textures/Stylized_Fire_particle_texture_3.png";
 		m_FireParticleComponentThree->Setting(info);
 
+		SetRootComponent(m_FireParticleComponentOne);
 		m_FireParticleComponentOne->SetLocalPosition(Vector3(100.f, 0.f, -200.f));
 		m_FireParticleComponentTwo->SetLocalPosition(Vector3(100.f, 0.f, -200.f));
 		m_FireParticleComponentThree->SetLocalPosition(Vector3(100.f, 0.f, -200.f));
@@ -170,6 +170,42 @@ void UIMeshTestObject::Initialize()
 		m_SparklesParticleComponentThree->SetLocalPosition(Vector3(300.f, 0.f, -200.f));
 	}
 
+	// 스켈레탈 메시 테스트
+	{
+		//m_TestSkeletalMeshComponent1 = CreateComponent<SkeletalMeshComponent>("1").lock();
+		//m_TestSkeletalMeshComponent2 = CreateComponent<SkeletalMeshComponent>("1").lock();
+		//m_TestSkeletalMeshComponent3 = CreateComponent<SkeletalMeshComponent>("1").lock();
+		//m_TestSkeletalMeshComponent4 = CreateComponent<SkeletalMeshComponent>("1").lock();
+		//m_TestSkeletalMeshComponent5 = CreateComponent<SkeletalMeshComponent>("1").lock();
+		//m_TestSkeletalMeshComponent6 = CreateComponent<SkeletalMeshComponent>("1").lock();
+		//m_TestSkeletalMeshComponent7 = CreateComponent<SkeletalMeshComponent>("1").lock();
+		//m_TestSkeletalMeshComponent8 = CreateComponent<SkeletalMeshComponent>("1").lock();
+		//m_TestSkeletalMeshComponent9 = CreateComponent<SkeletalMeshComponent>("1").lock();
+		//m_TestSkeletalMeshComponent10 = CreateComponent<SkeletalMeshComponent>("1").lock();
+
+		//m_TestSkeletalMeshComponent1.lock()->SetDefaultAnimation("../Resources/TestSkeletal/bear_ animation.fbx");
+		//m_TestSkeletalMeshComponent2.lock()->SetDefaultAnimation("../Resources/TestSkeletal/bear_ animation_2.fbx");
+		//m_TestSkeletalMeshComponent3.lock()->SetDefaultAnimation("../Resources/TestSkeletal/bear_ animation_3.fbx");
+		//m_TestSkeletalMeshComponent4.lock()->SetDefaultAnimation("../Resources/TestSkeletal/bear_ head_.fbx");
+		//m_TestSkeletalMeshComponent5.lock()->SetDefaultAnimation("../Resources/TestSkeletal/BEAR_ANI_BEAR_A.fbx");
+		//m_TestSkeletalMeshComponent6.lock()->SetDefaultAnimation("../Resources/TestSkeletal/BEAR_ANI_BEAR_O.fbx");
+		//m_TestSkeletalMeshComponent7.lock()->SetDefaultAnimation("../Resources/TestSkeletal/BEAR_ANI_BEAR_T.fbx");
+		//m_TestSkeletalMeshComponent8.lock()->SetDefaultAnimation("../Resources/TestSkeletal/BEAR_ANI_BEAR_x.fbx");
+		//m_TestSkeletalMeshComponent9.lock()->SetDefaultAnimation("../Resources/TestSkeletal/bear_model.fbx");
+		//m_TestSkeletalMeshComponent10.lock()->SetDefaultAnimation("../Resources/TestSkeletal/bear_with_armature.fbx");
+
+		//m_TestSkeletalMeshComponent1.lock()->SetLocalPosition(Vector3(0.f   , 1000.f, 0.f));
+		//m_TestSkeletalMeshComponent2.lock()->SetLocalPosition(Vector3(100.f , 1000.f, 500.f));
+		//m_TestSkeletalMeshComponent3.lock()->SetLocalPosition(Vector3(200.f , 1000.f, 0.f));
+		//m_TestSkeletalMeshComponent4.lock()->SetLocalPosition(Vector3(300.f , 1000.f, 500.f));
+		//m_TestSkeletalMeshComponent5.lock()->SetLocalPosition(Vector3(400.f , 1000.f, 0.f));
+		//m_TestSkeletalMeshComponent6.lock()->SetLocalPosition(Vector3(500.f , 1000.f, 500.f));
+		//m_TestSkeletalMeshComponent7.lock()->SetLocalPosition(Vector3(600.f , 1000.f, 0.f));
+		//m_TestSkeletalMeshComponent8.lock()->SetLocalPosition(Vector3(700.f , 1000.f, 500.f));
+		//m_TestSkeletalMeshComponent9.lock()->SetLocalPosition(Vector3(800.f , 1000.f, 0.f));
+		//m_TestSkeletalMeshComponent10.lock()->SetLocalPosition(Vector3(900.f + 300.f, 1000.f, 500.f));
+	}
+
 	GameObject::Initialize();
 }
 
@@ -193,11 +229,21 @@ void UIMeshTestObject::ChangedUIMaterial()
 }
 
 
-///  Particle Component의 파티클 재생 예제 코드 ///
+/// Particle Component의 파티클 재생 예제 코드 ///
 void UIMeshTestObject::PlayParticle()
 {
-	m_ShockParticleComponentOne->PlayParticle(0.1);
-	m_ShockParticleComponentTwo->PlayParticle(0.1);
-	m_ShockParticleComponentThree->PlayParticle(0.1);
-	m_ShockParticleComponentFour->PlayParticle(0.1);
+	m_ShockParticleComponentOne->PlayParticle(0.1f);
+	m_ShockParticleComponentTwo->PlayParticle(0.1f);
+	m_ShockParticleComponentThree->PlayParticle(0.1f);
+	m_ShockParticleComponentFour->PlayParticle(0.1f);
+}
+
+
+/// OutLine On/Off 예제 코드 ///
+void UIMeshTestObject::ChangedMeshOutLine()
+{
+	if (m_SkeletalTestComponent->GetIsOutLine() == true)
+		m_SkeletalTestComponent->SetIsOutLine(false);
+	else if (m_SkeletalTestComponent->GetIsOutLine() == false)
+		m_SkeletalTestComponent->SetIsOutLine(true);
 }

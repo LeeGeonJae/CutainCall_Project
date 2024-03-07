@@ -25,11 +25,17 @@ std::string& FSM::GetAnimationName(std::string_view stateName)
 	return m_stateAnimationMap.find(std::string(stateName))->second;
 }
 
+std::string& FSM::GetMaterialName(std::string_view stateName)
+{
+	return m_stateMaterialMap.find(std::string(stateName))->second;
+}
+
 void FSM::Update(float deltaTime)
 {
 	if (m_pCurState->CheckTransition())
 	{
 		// 만족하는 Transition이 있으면 상태 전환
+		m_pCurState->OnExit();
 		m_pCurState = m_pNextState;
 		m_pCurState->OnEnter();
 	}

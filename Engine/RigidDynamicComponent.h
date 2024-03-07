@@ -18,6 +18,7 @@ class RigidDynamicComponent
 	: public RigidBodyComponent, public std::enable_shared_from_this<RigidDynamicComponent>
 {
 public:
+	virtual ~RigidDynamicComponent();
 	PxRigidDynamic* GetRigidDynamic() { return m_rigidDynamic; }
 
 	template<typename CollisionHandlerType>
@@ -33,23 +34,16 @@ public:
 	//dynamicFriction : 운동 마찰력
 	//restitution : 반발 계수
 	//density : 밀도
-	PxRigidDynamic* CreateDynamicRigidBody(Geometry gesometryType, const std::vector<float>& geometryArgs, const std::vector<float>& materialArgs, float density = 1.f, bool isTrigger = false);
+	PxRigidDynamic* CreateDynamicRigidBody(Geometry gesometryType, const std::vector<float>& geometryArgs, const std::vector<float>& materialArgs, float density = 1.f, const Math::Vector3& offsetTrasnform = { 0.f, 0.f, 0.f }, const Math::Vector3& offsetRotation = { 0.f, 0.f, 0.f }, bool isTrigger = false);
 
 	void AddTriggerShape(Geometry geometryType, const std::vector<float>& geometryArgs, const Math::Vector3& offsetTrasnform = { 0.f, 0.f, 0.f }, const Math::Vector3& offsetRotation = { 0.f, 0.f, 0.f });
 
 	void SetMass(float mass, Math::Vector3 centerOfMassLocalPos = { 0.f, 0.f, 0.f });
 	void SetLockFlags(PxRigidDynamicLockFlags flags);
+	void SetTransform(Math::Matrix& worldMatrix);
 
 	virtual void Initialize() override;
 	virtual void Update(float deltaTime) override;
-	//virtual void OnInputProcess(
-	//	const Keyboard::State& KeyState,
-	//	const Keyboard::KeyboardStateTracker& KeyTracker,
-	//	const Mouse::State& MouseState,
-	//	const Mouse::ButtonStateTracker& MouseTracker
-	//) final;
-
-
 
 private:
 	PxRigidDynamic* m_rigidDynamic;

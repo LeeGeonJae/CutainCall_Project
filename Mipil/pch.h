@@ -27,6 +27,9 @@
 #include <dxgi1_4.h>
 #include <memory>
 
+#define TIMEOUT 20.f
+#define SHOW_GAME_START 3.f
+#define SHOW_STAGE_CLEAR 3.f
 
 using namespace Microsoft::WRL;
 using namespace DirectX::SimpleMath;
@@ -55,5 +58,10 @@ namespace grid
 	constexpr Vector3 Z_DOWN = { 0, 0, -1 };
 	constexpr Vector3 STAY = { 0,0,0 };
 }
+
+
+#include "../D3DRenderer/Helper.h"
+
+constexpr float BASE_HEIGHT = 30.f;
 
 #endif

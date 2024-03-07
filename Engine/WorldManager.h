@@ -18,7 +18,7 @@ class WorldManager
 	: public Singleton<WorldManager>
 {
 public:
-	WorldManager();
+	WorldManager() = default;
 	~WorldManager() = default;
 
 public:
@@ -27,6 +27,7 @@ public:
 	void SetDefaultWorld(std::shared_ptr<World> world) { m_currentWorld = world; }
 
 	void ChangeWorld(eWorldType worldType);
+	void GoToPrevWorld();
 
 	bool PopRecvQueue(std::pair<char*, int>& value) { return m_recvQueue.try_pop(value); }
 	bool PopSendQueue(std::pair<char*, int>& value) { return m_sendQueue.try_pop(value); }
@@ -51,9 +52,8 @@ public:
 	void SetHostServer() { m_bHost = true; }
 	bool IsHostServer() { return m_bHost; }
 
-	//TODO : (기림) 월드매니저에서 월드 생성하도록 변경, 월드 변경 이벤트 또한 월드매니저 쪽에서 처리하도록
 private:
-	std::vector<std::shared_ptr<World>> m_worlds;
+	std::shared_ptr<World> m_worlds[static_cast<int>(eWorldType::END)];
 	std::shared_ptr<World> m_currentWorld;
 	std::shared_ptr<World> m_prevWorld;
 
@@ -80,7 +80,7 @@ public:
 		world->SetName(worldName);
 		world->SetWorldType(worldType);
 
-		m_worlds.emplace_back(world);
+		m_worlds[static_cast<int>(worldType)] = world;
 
 		return world;
 	}

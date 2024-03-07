@@ -1,7 +1,9 @@
 #pragma once
 
 struct BlockPOD;
+struct PartPOD;
 enum class eBlockType;
+enum class ePartType;
 
 // 밖에서는 파일 읽어오고
 // 블록 제너레이터 동작시킴
@@ -18,8 +20,10 @@ public:
 	~YAMLParser() = default;
 
 	void ReadBlockPOD(std::string_view filePath, std::vector<std::shared_ptr<BlockPOD>>& blockPODs);
+	void ReadPartPOD(std::string_view filePath, std::vector<std::shared_ptr<PartPOD>>& partPODs);
 
 private:
 	eBlockType GetBlockType(std::string_view blockName);
+	ePartType GetPartType(std::string_view partName);
 };
 

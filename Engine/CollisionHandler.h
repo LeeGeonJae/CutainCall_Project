@@ -13,8 +13,13 @@ class CollisionHandler
 public:
 	virtual ~CollisionHandler() {}
 
-	virtual void OnEnter(std::weak_ptr<GameObject> actor1, std::weak_ptr<GameObject> actor2) abstract;
-	virtual void OnStay(std::weak_ptr<GameObject> actor1, std::weak_ptr<GameObject> actor2) abstract;
-	virtual void OnExit(std::weak_ptr<GameObject> actor1, std::weak_ptr<GameObject> actor2) abstract;
+	virtual void OnContactEnter(std::weak_ptr<GameObject> actor1, std::weak_ptr<GameObject> actor2, const physx::PxContactPair& cp) abstract;
+	virtual void OnContactStay(std::weak_ptr<GameObject> actor1, std::weak_ptr<GameObject> actor2, const physx::PxContactPair& cp) abstract;
+	virtual void OnContactExit(std::weak_ptr<GameObject> actor1, std::weak_ptr<GameObject> actor2, const physx::PxContactPair& cp) abstract;
+
+	virtual void OnTriggerEnter(std::weak_ptr<GameObject> actor1, std::weak_ptr<GameObject> actor2, const physx::PxTriggerPair& tp) abstract;
+	virtual void OnTriggerExit(std::weak_ptr<GameObject> actor1, std::weak_ptr<GameObject> actor2, const physx::PxTriggerPair& tp) abstract;
+
+
 };
 

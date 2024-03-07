@@ -1,11 +1,14 @@
-#include "pch.h"
+ï»¿#include "pch.h"
 #include "TestWorld.h"
 
 #include "StaticTestObject.h"
+#include "PlayerObject.h"
 #include "TestPlayerObject.h"
 #include "CubeMapObject.h"
+#include "MapObject.h"
 #include "BlockGenerator.h"
 #include "GridManager.h"
+#include "GridMovementComponent.h"
 
 #include "../Engine/EventManager.h"
 #include "../Engine/GameObject.h"
@@ -15,15 +18,19 @@
 #include "../Engine/Model.h"
 #include "../Engine/WorldManager.h"
 #include "../Engine/SoundManager.h"
-#include "../Engine/UITest.h"
 #include "../Engine/UIText.h"
+#include "../Engine/UIPanel.h"
 #include "../Engine/UITriggerPopUp.h"
 #include "../Engine/UIFunctorPopUp.h"
 #include "../Engine/UIHoverPopUpFunctor.h"
 #include "../Engine/UIClickPopUpFunctor.h"
+#include "../Engine/RigidStaticComponent.h"
+
+#include "ShockParticleObjcect.h"
 #include "StaticFbxObject.h"
 #include "SkeletalFbxObject.h"
 #include "UIMeshTestObject.h"
+#include "CreditObject.h"
 
 #include "../NetworkLibrary/MyProtocol.h"
 #include "../D3DRenderer/UIInstance.h"
@@ -35,20 +42,29 @@
 TestWorld::TestWorld()
 {
 	EventManager::GetInstance()->RegisterListener(eEventType::CHANGE_WORLD, this);
-	EventManager::GetInstance()->RegisterListener(eEventType::DELETE_OBJECT, this);
+	//EventManager::GetInstance()->RegisterListener(eEventType::DELETE_OBJECT, this);
 
 	WorldManager::GetInstance()->RegisterHandler(S2C_SET_TURN, std::bind(&TestWorld::SetTurn, this, std::placeholders::_1));
 	WorldManager::GetInstance()->RegisterHandler(S2C_START_TURN, std::bind(&TestWorld::StartTurn, this, std::placeholders::_1));
-	WorldManager::GetInstance()->RegisterHandler(S2C_END_TURN, std::bind(&TestWorld::EndTurn, this, std::placeholders::_1));
+	//WorldManager::GetInstance()->RegisterHandler(S2C_END_TURN, std::bind(&TestWorld::EndTurn, this, std::placeholders::_1));
 	WorldManager::GetInstance()->RegisterHandler(S2C_CHANGE_TURN, std::bind(&TestWorld::ChangeTurn, this, std::placeholders::_1));
 	WorldManager::GetInstance()->RegisterHandler(S2C_IS_ALL_READY, std::bind(&TestWorld::ClientsAllReady, this, std::placeholders::_1));
-	WorldManager::GetInstance()->RegisterHandler(S2C_CHARACTER_MOVE, std::bind(&TestWorld::CharacterMove, this, std::placeholders::_1));
+	//WorldManager::GetInstance()->RegisterHandler(S2C_CHARACTER_MOVE, std::bind(&TestWorld::CharacterMove, this, std::placeholders::_1));
 }
 
 TestWorld::~TestWorld()
 {
 	EventManager::GetInstance()->UnregisterListener(eEventType::CHANGE_WORLD, this);
-	EventManager::GetInstance()->UnregisterListener(eEventType::DELETE_OBJECT, this);
+	//EventManager::GetInstance()->UnregisterListener(eEventType::DELETE_OBJECT, this);
+}
+
+std::shared_ptr<TestPlayerObject> TestWorld::GetOtherPlayer(TestPlayerObject* player)
+{
+	if (player == m_hostPlayer.get())
+		return m_guestPlayer;
+	else
+		return m_hostPlayer;
+
 }
 
 void TestWorld::Initialize()
@@ -60,52 +76,17 @@ void TestWorld::Initialize()
 	auto controllerComponent = m_Camera->CreateComponent<ControllerComponent>("Test_Controller_Component");
 	controllerComponent.lock()->CreateController<FPSCameraController>();
 
-	auto TestPopUpUI = m_UIManager->CreateUI<UIFunctorPopUp>(L"UITestPopUp");
-	TestPopUpUI->SetTexturePath(L"../Resources/Textures/testpanel.png");
-	TestPopUpUI->SetSize({ 400.f, 400.f });
-	TestPopUpUI->SetPosition({ 0.f, 0.f });
-
-	auto PopUpFunctor = std::make_shared<UIClickPopUpFunctor>();
-	PopUpFunctor->SetTargetUI(TestPopUpUI);
-
-	auto TestUI = m_UIManager->CreateUI<UITest>(L"TestUI");
+	auto TestUI = m_UIManager->CreateUI<UIPanel>(L"TestUI");
 	TestUI->SetTexturePath(L"../Resources/Textures/Snake.bmp");
 	TestUI->SetSize({ 100.f, 100.f });
 	TestUI->SetPosition({ -700.f, -300.f });
 	TestUI->SetScale({ 1.5f, 1.5f });
-	TestUI->SetMouseClickFunctor(std::move(PopUpFunctor));
 
-	auto FadeInTestUI = m_UIManager->CreateUI<UITest>(L"FadeInTestUI");
+	auto FadeInTestUI = m_UIManager->CreateUI<UIPanel>(L"FadeInTestUI");
 	FadeInTestUI->SetSize({ 1920.f, 1080.f });
 	FadeInTestUI->SetPosition({ 0.f, 0.f });
 	FadeInTestUI->SetScale({ 1.0f, 1.0f });
 	m_tFadeInOut = FadeInTestUI;
-
-	auto TestTextUI1 = m_UIManager->CreateUI<UIText, void>(L"TestTextUI1");
-	TestTextUI1->SetPosition({ -50.f, 0.f });
-	TestTextUI1->SetFont(L"ÈŞ¸ÕÆíÁöÃ¼");
-	TestTextUI1->SetFontSize(30.f);
-	TestTextUI1->SetColor(D2D1::ColorF::Lavender);
-	TestTextUI1->SetText(L"µÇ³Ä?");
-	auto TestTextUI2 = m_UIManager->CreateUI<UIText, void>(L"TestTextUI2");
-	TestTextUI2->SetPosition({ 50.f, 0.f });
-	TestTextUI2->SetFont(L"ÈŞ¸ÕÆíÁöÃ¼");
-	TestTextUI2->SetFontSize(30.f);
-	TestTextUI2->SetColor(D2D1::ColorF::Maroon);
-	TestTextUI2->SetText(L"µÇ³×!");
-	auto TestTextUI3 = m_UIManager->CreateUI<UIText, void>(L"TestTextUI3");
-	TestTextUI3->SetPosition({ 0.f, 50.f });
-	TestTextUI3->SetFont(L"Arial");
-	TestTextUI3->SetFontSize(30.f);
-	TestTextUI3->SetColor(D2D1::ColorF::MediumSeaGreen);
-	TestTextUI3->SetText(L"ÁøÂ¥ µÇ³Ä?");
-	auto TestTextUI4 = m_UIManager->CreateUI<UIText, void>(L"TestTextUI4");
-	TestTextUI4->SetPosition({ 0.f, -50.f });
-	TestTextUI4->SetFont(L"Arial");
-	TestTextUI4->SetFontSize(30.f);
-	TestTextUI4->SetColor(D2D1::ColorF::Peru);
-	TestTextUI4->SetText(L"ÁøÂ¥ µÇ³×!");
-	TestPopUpUI->AddChildren(TestTextUI1, TestTextUI2, TestTextUI3, TestTextUI4);
 
 	//SoundManager::GetInstance()->LoadSound("../Resources/Sound/bgm.mp3", FMOD_LOOP_NORMAL);
 	//SoundManager::GetInstance()->LoadSound("../Resources/Sound/jump.mp3");
@@ -115,19 +96,36 @@ void TestWorld::Initialize()
 	//SoundManager::GetInstance()->PlaySound("../Resources/Sound/bgm.mp3");
 	//SoundManager::GetInstance()->SetVolume("../Resources/Sound/bgm.mp3", 0.1f);
 
-	std::shared_ptr<TestPlayerObject> hostPlayer = CreateGameObject<TestPlayerObject>("HostPlayer", eObjectType::PLAYER).lock();
-//	std::shared_ptr<TestPlayerObject> guestPlayer = CreateGameObject<TestPlayerObject>("GuestPlayer", eObjectType::PLAYER).lock();
+	auto plane = CreateGameObject<GameObject>("Plane", eObjectType::PLANE).lock();
+	auto planeRigidBody = plane->CreateComponent<RigidStaticComponent>("Plane_Rigidbody");
+	auto planeSceneComponent = plane->CreateComponent<SceneComponent>("Plane_SceneComponent");
+	plane->SetRootComponent(planeSceneComponent.lock());
+	planeRigidBody.lock()->CreatePlane(0.f, 1.f, 0.f, 0.f, { 0.5f, 0.5f, 0.6f });
 
-//	std::shared_ptr<StaticTestObject> TestObject = CreateGameObject<StaticTestObject>("TestObject", eObjectType::TEST).lock();
+	m_hostPlayer = CreateGameObject<TestPlayerObject>("HostPlayer", eObjectType::PLAYER).lock();
+	m_guestPlayer = CreateGameObject<TestPlayerObject>("GuestPlayer", eObjectType::PLAYER).lock();
+	m_hostPlayer->SetHostPlayer(true);
+	m_hostPlayer->SetTurn(true);
+
+	auto TestMap = CreateGameObject<MapObject>("Map", eObjectType::MAP).lock();
+	TestMap->SetFilePath("../Resources/FBX/map.fbx");
+
+	auto shockParticleObjcect = CreateGameObject<ShockParticleObjcect>("Shock_Particle_Objcect", eObjectType::PARTICLE).lock();
+	//m_guestPlayer = CreateGameObject<TestPlayerObject>("GuestPlayer", eObjectType::PLAYER).lock();
+
+	  std::shared_ptr<StaticTestObject> TestObject = CreateGameObject<StaticTestObject>("TestObject", eObjectType::TEST).lock();
 	std::shared_ptr<UIMeshTestObject> uiMeshObject = CreateGameObject<UIMeshTestObject>("UIMeshObject", eObjectType::TEST).lock();
+	std::shared_ptr<CreditObject> endingCreditObject = CreateGameObject<CreditObject>("EndingCreditObject", eObjectType::TEST).lock();
 
 	//if (WorldManager::GetInstance()->IsHostServer())
-	//	hostPlayer->SetHostPlayer(true);
-	//else guestPlayer->SetHostPlayer(true);
+	//	m_hostPlayer->SetHostPlayer(true);
+	//else m_guestPlayer->SetHostPlayer(true);
 
-	// Test FBX Object
-	//std::shared_ptr<StaticFbxObject> fbxTest = CreateGameObject<StaticFbxObject>("FBX_TEST", eObjectType::TEST).lock();
+
+	// ì¬í˜„
+	//std::shared_ptr<StaticFbxObject> fbxTest = CreateGameObject<StaticFbxObject>("FBX_TEST2", eObjectType::TEST).lock();
 	//std::shared_ptr<SkeletalFbxObject> fbxBearTest = CreateGameObject<SkeletalFbxObject>("FBX_TEST", eObjectType::TEST).lock();
+
 
 	// CubeMap
 	CreateGameObject<CubeMapObject>("CubeMap", eObjectType::TEST);
@@ -149,24 +147,31 @@ void TestWorld::Initialize()
 	__super::Initialize();
 
 	/// --------------------------------------------
+
 	/// GridManager
 	m_gridManager = std::make_shared<GridManager>();
 	m_gridManager->CreateMap(10, 10, 5, 0.f, 0.f, 0.f, 100.f);
 	m_gridManager->SetMapState(GetGameObjects(eObjectType::LEVEL));
 	m_gridManager->SetMapState(GetGameObjects(eObjectType::PLAYER));
 
+	m_hostPlayer->SetGridManager(m_gridManager);
+	m_guestPlayer->SetGridManager(m_gridManager);
 
-//	TestObject->GetRootComponent().lock()->SetLocalPosition({ -100.f, 0.f, 0.f });
-//	TestObject->GetRootComponent().lock()->SetLocalScale({ 1.f, 1.f, 1.f });
 
-	// ÀçÇö
+	//TestObject->GetRootComponent().lock()->SetLocalPosition({ -100.f, 0.f, 0.f });
+	//TestObject->GetRootComponent().lock()->SetLocalScale({ 1.f, 1.f, 1.f });
+
+
+	// ì¬í˜„
 	//fbxTest->GetRootComponent().lock()->SetLocalPosition({ 150.f, 0.f, 50.f });
 	//fbxTest->GetRootComponent().lock()->SetLocalScale({ 1.f, 1.f, 1.f });
 
 	//fbxBearTest->GetRootComponent().lock()->SetLocalPosition({ -150.f, 0.f, -50.f });
-	//fbxBearTest->GetRootComponent().lock()->SetLocalScale({ 1.f, 1.f, 1.f });
+	///fbxBearTest->GetRootComponent().lock()->SetLocalScale({ 1.f, 1.f, 1.f });
+	//fbxBearTest->SetPosition(Vector3{ 100.f, 100.f, 100.f });
 
-	// °ÇÀç : UI ¾Ö´Ï¸ŞÀÌ¼Ç Å×½ºÆ®
+
+	// ê±´ì¬ : UI ì• ë‹ˆë©”ì´ì…˜ í…ŒìŠ¤íŠ¸
 	{
 		for (int i = 0; i < 13; i++)
 		{
@@ -207,7 +212,7 @@ void TestWorld::Update(float deltaTime)
 		m_tFadeInOut->GetUIInstance().lock()->UpdateFadeInOut(deltaTime);
 	}
 
-	// ¸ğµç Å¬¶ó°¡ ·¹µğ¶ó¸é!
+	// ëª¨ë“  í´ë¼ê°€ ë ˆë””ë¼ë©´!
 	if (m_bGameRun)
 	{
 		m_fixedDelta += deltaTime;
@@ -219,18 +224,18 @@ void TestWorld::Update(float deltaTime)
 	}
 }
 
-// ÅÏ ¼³Á¤ÇØÁÖ±â
+// í„´ ì„¤ì •í•´ì£¼ê¸°
 void TestWorld::SetTurn(char* pData)
 {
 	if (pData[4] == '0')
 	{
 		m_bTurn = true;
-		printf("1P ÅÏÀÌ´ç\n");
+		printf("1P í„´ì´ë‹¹\n");
 	}
 	else if (pData[4] == '1')
 	{
 		m_bTurn = true;
-		printf("2P ÅÏÀÌ´ç\n");
+		printf("2P í„´ì´ë‹¹\n");
 	}
 
 	delete[] pData;
@@ -239,7 +244,7 @@ void TestWorld::SetTurn(char* pData)
 void TestWorld::StartTurn(char* pData)
 {
 	delete[] pData;
-	// ´©±¸ ÅÏÀÎÁö BroadCastÇÏ°Ô ÇØÁÜ.
+	// ëˆ„êµ¬ í„´ì¸ì§€ BroadCastí•˜ê²Œ í•´ì¤Œ.
 	char* broadCastTurn = new char[SND_BUF_SIZE];
 	const char* msg = "1P Turn";
 	memcpy(broadCastTurn, msg, SND_BUF_SIZE);
@@ -269,7 +274,7 @@ void TestWorld::ClientsAllReady(char* pData)
 	PacketS2C_IsAllReady* pAllReady = reinterpret_cast<PacketS2C_IsAllReady*>(pData);
 	assert(pAllReady != nullptr);
 
-	m_bGameRun = pAllReady->isReady == '0' ? false : true;
+	m_bGameRun = true;
 
 	if (m_bGameRun)
 	{
@@ -281,71 +286,61 @@ void TestWorld::ClientsAllReady(char* pData)
 
 void TestWorld::CharacterMove(char* pData)
 {
-	PacketS2C_CharacterMove* pCharacterMove = reinterpret_cast<PacketS2C_CharacterMove*>(pData);
-	assert(pCharacterMove != nullptr);
+	//PacketS2C_CharacterMove* pCharacterMove = reinterpret_cast<PacketS2C_CharacterMove*>(pData);
+	//assert(pCharacterMove != nullptr);
 
-	for (auto& object : m_gameObjects[static_cast<int>(eObjectType::PLAYER)])
-	{
-		std::shared_ptr<TestPlayerObject> pObj = std::dynamic_pointer_cast<TestPlayerObject>(object);
-		if (pObj != nullptr)
-		{
-			// È£½ºÆ® ¼­¹ö¿¡¼­ ÇÃ·¹ÀÌ¾î°¡ ¿òÁ÷¿´´Ù
-			if (pCharacterMove->who == '0')
-			{
-				if (WorldManager::GetInstance()->IsHostServer() && pObj->IsHostPlayer())
-				{
-					// zÃà ÀÌµ¿
-					if (pCharacterMove->direction == '0')
-					{
-						Math::Vector3 pos = pObj->GetRootComponent().lock()->GetLocalPosition();
-						pObj->GetRootComponent().lock()->SetLocalPosition({ pos.x, pos.y, pos.z + 50.f });
-					}
-				}
-				else if (!WorldManager::GetInstance()->IsHostServer() && !pObj->IsHostPlayer())
-				{
-					// zÃà ÀÌµ¿
-					if (pCharacterMove->direction == '0')
-					{
-						Math::Vector3 pos = pObj->GetRootComponent().lock()->GetLocalPosition();
-						pObj->GetRootComponent().lock()->SetLocalPosition({ pos.x, pos.y, pos.z + 50.f });
-					}
-				}
-			}
-			// °Ô½ºÆ® ¼­¹ö¿¡¼­ ÇÃ·¹ÀÌ¾î°¡ ¿òÁ÷¿´´Ù
-			else
-			{
-				if (!WorldManager::GetInstance()->IsHostServer() && pObj->IsHostPlayer())
-				{
-					// zÃà ÀÌµ¿
-					if (pCharacterMove->direction == '0')
-					{
-						Math::Vector3 pos = pObj->GetRootComponent().lock()->GetLocalPosition();
-						pObj->GetRootComponent().lock()->SetLocalPosition({ pos.x, pos.y, pos.z + 50.f });
-					}
-				}
-				else if (WorldManager::GetInstance()->IsHostServer() && !pObj->IsHostPlayer())
-				{
-					// zÃà ÀÌµ¿
-					if (pCharacterMove->direction == '0')
-					{
-						Math::Vector3 pos = pObj->GetRootComponent().lock()->GetLocalPosition();
-						pObj->GetRootComponent().lock()->SetLocalPosition({ pos.x, pos.y, pos.z + 50.f });
-					}
-				}
-			}
-		}
-	}
+	//for (auto& object : m_gameObjects[static_cast<int>(eObjectType::PLAYER)])
+	//{
+	//	std::shared_ptr<TestPlayerObject> pObj = std::dynamic_pointer_cast<TestPlayerObject>(object);
+	//	if (pObj != nullptr)
+	//	{
+	//		// í˜¸ìŠ¤íŠ¸ ì„œë²„ì—ì„œ í”Œë ˆì´ì–´ê°€ ì›€ì§ì˜€ë‹¤
+	//		if (pCharacterMove->who == '0')
+	//		{
+	//			if (WorldManager::GetInstance()->IsHostServer() && pObj->GetHostPlayer())
+	//			{
+	//				// zì¶• ì´ë™
+	//				if (pCharacterMove->direction == '0')
+	//				{
+	//					Math::Vector3 pos = pObj->GetRootComponent().lock()->GetLocalPosition();
+	//					pObj->GetRootComponent().lock()->SetLocalPosition({ pos.x, pos.y, pos.z + 50.f });
+	//				}
+	//			}
+	//			else if (!WorldManager::GetInstance()->IsHostServer() && !pObj->GetHostPlayer())
+	//			{
+	//				// zì¶• ì´ë™
+	//				if (pCharacterMove->direction == '0')
+	//				{
+	//					Math::Vector3 pos = pObj->GetRootComponent().lock()->GetLocalPosition();
+	//					pObj->GetRootComponent().lock()->SetLocalPosition({ pos.x, pos.y, pos.z + 50.f });
+	//				}
+	//			}
+	//		}
+	//		// ê²ŒìŠ¤íŠ¸ ì„œë²„ì—ì„œ í”Œë ˆì´ì–´ê°€ ì›€ì§ì˜€ë‹¤
+	//		else
+	//		{
+	//			if (!WorldManager::GetInstance()->IsHostServer() && pObj->GetHostPlayer())
+	//			{
+	//				// zì¶• ì´ë™
+	//				if (pCharacterMove->direction == '0')
+	//				{
+	//					Math::Vector3 pos = pObj->GetRootComponent().lock()->GetLocalPosition();
+	//					pObj->GetRootComponent().lock()->SetLocalPosition({ pos.x, pos.y, pos.z + 50.f });
+	//				}
+	//			}
+	//			else if (WorldManager::GetInstance()->IsHostServer() && !pObj->GetHostPlayer())
+	//			{
+	//				// zì¶• ì´ë™
+	//				if (pCharacterMove->direction == '0')
+	//				{
+	//					Math::Vector3 pos = pObj->GetRootComponent().lock()->GetLocalPosition();
+	//					pObj->GetRootComponent().lock()->SetLocalPosition({ pos.x, pos.y, pos.z + 50.f });
+	//				}
+	//			}
+	//		}
+	//	}
+	//}
 	delete[] pData;
-}
-
-void TestWorld::MovePlayer(TestPlayerObject* player, Vector3 vec)
-{
-	m_gridManager->MoveOnGrid(player, vec);
-}
-
-bool TestWorld::IsGround(Vector3 pos)
-{
-	return m_gridManager->IsGround(pos);
 }
 
 void TestWorld::OnEnter()
@@ -369,12 +364,12 @@ void TestWorld::HandleEvent(Event* event)
 		WorldManager::GetInstance()->ChangeWorld(event->GetData<eWorldType>());
 		break;
 	case eEventType::DELETE_OBJECT:
-		// ÇØ´ç Å¸ÀÔ¿¡¼­ ¹æ±İ »ı¼ºÇÑ ¿ÀºêÁ§Æ® »èÁ¦ÇÏ´Â Å×½ºÆ® ÄÚµå
-		if (m_gameObjects[static_cast<int>(event->GetData<eObjectType>())].size() <= 0)
-			break;
-		std::string objName = m_gameObjects[static_cast<int>(event->GetData<eObjectType>())][m_gameObjects[static_cast<int>(event->GetData<eObjectType>())].size() - 1]->GetName();
-		if (!objName.empty())
-			DeleteGameObject(objName);
+		// í•´ë‹¹ íƒ€ì…ì—ì„œ ë°©ê¸ˆ ìƒì„±í•œ ì˜¤ë¸Œì íŠ¸ ì‚­ì œí•˜ëŠ” í…ŒìŠ¤íŠ¸ ì½”ë“œ
+		//if (m_gameObjects[static_cast<int>(event->GetData<eObjectType>())].size() <= 0)
+		//	break;
+		//std::string objName = m_gameObjects[static_cast<int>(event->GetData<eObjectType>())][m_gameObjects[static_cast<int>(event->GetData<eObjectType>())].size() - 1]->GetName();
+		//if (!objName.empty())
+		//	DeleteGameObject(objName);
 		break;
 	}
 }
@@ -387,25 +382,26 @@ void TestWorld::OnInputProcess(const Keyboard::State& KeyState, const Keyboard::
 		if (KeyTracker.IsKeyPressed(DirectX::Keyboard::Keys::Up))
 		{
 			CreateGameObjectRuntime<StaticTestObject>("StaticMesh", eObjectType::PLAYER);
-			CreateGameObjectRuntime<TestPlayerObject>("SkeletalMesh", eObjectType::PLAYER);
+			CreateGameObjectRuntime<PlayerObject>("SkeletalMesh", eObjectType::PLAYER);
 		}
 		if (KeyTracker.IsKeyPressed(DirectX::Keyboard::Keys::Down))
 		{
-			// ÇØ´ç Å¸ÀÔ¿¡¼­ ¹æ±İ »ı¼ºÇÑ ¿ÀºêÁ§Æ® »èÁ¦ÇÏ´Â Å×½ºÆ® ÄÚµå
-			EventManager::GetInstance()->SendEvent(eEventType::DELETE_OBJECT, this, eObjectType::PLAYER);
-			EventManager::GetInstance()->SendEvent(eEventType::DELETE_OBJECT, this, eObjectType::PLAYER);
+			// í•´ë‹¹ íƒ€ì…ì—ì„œ ë°©ê¸ˆ ìƒì„±í•œ ì˜¤ë¸Œì íŠ¸ ì‚­ì œí•˜ëŠ” í…ŒìŠ¤íŠ¸ ì½”ë“œ
+			//EventManager::GetInstance()->SendEvent(eEventType::DELETE_OBJECT, this, eObjectType::PLAYER);
+			//EventManager::GetInstance()->SendEvent(eEventType::DELETE_OBJECT, this, eObjectType::PLAYER);
 		}
 
 		if (KeyTracker.IsKeyPressed(DirectX::Keyboard::Keys::Enter))
 		{
-			// ÅÏ ³Ñ°ÜÁÖ±â
+			// í„´ ë„˜ê²¨ì£¼ê¸°
 			WorldManager::GetInstance()->PushSendQueue(
 				WorldManager::GetInstance()->SerializeBuffer(sizeof(PacketC2S_ChangeTurn), C2S_CHANGE_TURN, nullptr),
 				sizeof(PacketC2S_ChangeTurn));
 		}
 	}
 
-	// ÀçÇö : ÆäÀÌµå ÀÎ ¾Æ¿ô Å×½ºÆ®
+
+	// ì¬í˜„ : í˜ì´ë“œ ì¸ ì•„ì›ƒ í…ŒìŠ¤íŠ¸
 	if (KeyTracker.IsKeyPressed(DirectX::Keyboard::Keys::Z))
 	{
 		m_tFadeInOut->GetUIInstance().lock()->FadeOutStart();
@@ -417,8 +413,8 @@ void TestWorld::OnInputProcess(const Keyboard::State& KeyState, const Keyboard::
 
 	if (KeyTracker.IsKeyPressed(DirectX::Keyboard::Keys::Delete))
 	{
-		// ÁØºñ ¹öÆ°
-		PacketC2S_READY ready;
+		// ì¤€ë¹„ ë²„íŠ¼
+		PacketC2S_READY ready = {};
 		ready.clickedReady = '1';
 
 		WorldManager::GetInstance()->PushSendQueue(
@@ -435,17 +431,17 @@ void TestWorld::OnInputProcess(const Keyboard::State& KeyState, const Keyboard::
 	{
 		SoundManager::GetInstance()->PlaySound("../Resources/Sound/effect.mp3");
 	}
-
-	if (KeyTracker.IsKeyPressed(DirectX::Keyboard::Keys::B))				// ¸ÓÅÍ¸®¾ó ¹Ù²î´Â °Å Å×½ºÆ®¿ë ÄÚµå
+	if (KeyTracker.IsKeyPressed(DirectX::Keyboard::Keys::B))				// ë¨¸í„°ë¦¬ì–¼ ë°”ë€ŒëŠ” ê±° í…ŒìŠ¤íŠ¸ìš© ì½”ë“œ
 	{
 		weak_ptr<UIMeshTestObject> object = dynamic_pointer_cast<UIMeshTestObject>(GetGameObject("UIMeshObject"));
 		object.lock()->ChangedMaterial();
 	}
-	if (KeyTracker.IsKeyPressed(DirectX::Keyboard::Keys::N))				// ¸ÓÅÍ¸®¾ó ¹Ù²î´Â °Å Å×½ºÆ®¿ë ÄÚµå
+	if (KeyTracker.IsKeyPressed(DirectX::Keyboard::Keys::N))				// ë¨¸í„°ë¦¬ì–¼ ë°”ë€ŒëŠ” ê±° í…ŒìŠ¤íŠ¸ìš© ì½”ë“œ
 	{
 		weak_ptr<UIMeshTestObject> object = dynamic_pointer_cast<UIMeshTestObject>(GetGameObject("UIMeshObject"));
 		object.lock()->PlayParticle();
 		object.lock()->ChangedUIMaterial();
+		object.lock()->ChangedMeshOutLine();
 	}
 
 }

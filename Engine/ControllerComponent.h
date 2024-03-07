@@ -19,6 +19,8 @@ public:
         requires std::is_base_of<Controller, T>::value
     void CreateController();
 
+    void ClearControllers();
+
     virtual void OnInputProcess(
         const Keyboard::State& KeyState,
         const Keyboard::KeyboardStateTracker& KeyTracker,

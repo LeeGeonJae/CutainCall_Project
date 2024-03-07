@@ -102,7 +102,7 @@ std::shared_ptr<ModelResource> ResourceManager::CreateModelResource(std::string 
 	return pSceneResource;
 }
 
-std::shared_ptr<Animation> ResourceManager::CreateAnimationResource(std::string filePath)
+std::shared_ptr<Animation> ResourceManager::CreateAnimationResource(std::string filePath, bool animLoop)
 {
 	auto it = m_AnimationMap.find(filePath);
 	if (it != m_AnimationMap.end())
@@ -128,6 +128,7 @@ std::shared_ptr<Animation> ResourceManager::CreateAnimationResource(std::string 
 	//	GameTimer timer;
 	//	timer.Tick();
 	std::shared_ptr<Animation> pAnimation = std::make_shared<Animation>();
+	pAnimation->m_animLoop = animLoop;
 	pAnimation->Create(filePath);
 	m_AnimationMap[filePath] = pAnimation;
 	//	timer.Tick();

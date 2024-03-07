@@ -17,6 +17,7 @@ struct ParticleComponentInfo
 	std::wstring m_TexturePath;		// 파티클 텍스쳐 경로
 	eParticleType m_ParticleType;	// 파티클 타입
 	bool bIsLoop = true;			// 파티클 루프
+	int ParticleDirection = 0;		// 파티클 방향
 };
 
 
@@ -41,7 +42,7 @@ public:
 
 public:
 	void PlayParticle(float particlePlayTime);
-	void StopParticle();
+	void PlayParticle(bool isPlaying);
 
 private:
 	ParticleComponentInfo m_ParticleInfo;				// 파티클 정보

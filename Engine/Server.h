@@ -45,16 +45,20 @@ public:
 	// 게임 로직 관련 함수들
 public:
 	void ClientSetReady(std::shared_ptr<Session> session, char* pMsg);
+	void BroadcastAction(std::shared_ptr<Session> session, char* pMsg);
 	void SetTurn(std::shared_ptr<Session> session, char* pMsg);
-	void EndTurn(std::shared_ptr<Session> session, char* pMsg);
+	void MovementEnd(std::shared_ptr<Session> session, char* pMsg);
+	//void EndTurn(std::shared_ptr<Session> session, char* pMsg);
 	void ChangeTurn();
 	void StartTurn(std::shared_ptr<Session> session, char* pMsg);
 	void BroadcastCheckAction();
+	void CheckRestartState(std::shared_ptr<Session> session, char* pMsg);
 	void BroadcastMsg(std::shared_ptr<Session> session, char* pMsg);
-	void SendCharacterPosition(std::shared_ptr<Session> session, char* pMsg);
-	void EndAction(std::shared_ptr<Session> session, char* pMsg);
+	void ClientSetEnter(std::shared_ptr<Session> session, char* pMsg);
+	void IsAllGoalIn(std::shared_ptr<Session> session, char* pMsg);
+	void IsAllGoalEnd(std::shared_ptr<Session> session, char* pMsg);
+	void IsAllEnter();
 	void IsAllReady();
-	void IsAllEnd();
 
 	void ServerLoop();
 

@@ -11,8 +11,10 @@ class PlayerState
 {
 public:
 	void OnEnter() override;
+	void OnExit() override;
 
 	void DecideFSMType() final;
+	virtual void SetOwnerType(bool isHostPlayer) abstract;
 
 protected:
 	PlayerFSM* m_pOwnerFSM = nullptr;
@@ -25,6 +27,9 @@ class State_Idle
 {
 public:
 	State_Idle();
+
+	void OnEnter() final;
+	void SetOwnerType(bool isHostPlayer) final;
 
 private:
 	IdleToTurnWait m_toTurnWait;
@@ -39,6 +44,9 @@ class State_Floating
 {
 public:
 	State_Floating();
+
+	void OnEnter() final;
+	void SetOwnerType(bool isHostPlayer) final;
 
 private:
 	FloatingToTurnWait m_toTurnWait;
@@ -55,6 +63,8 @@ class State_TurnWait
 public:
 	State_TurnWait();
 
+	void SetOwnerType(bool isHostPlayer) final;
+
 private:
 	TurnWaitToIdle m_toIdle;
 };
@@ -66,6 +76,9 @@ class State_TurnMove
 {
 public:
 	State_TurnMove();
+
+	void OnEnter() final;
+	void SetOwnerType(bool isHostPlayer) final;
 
 private:
 	TurnMoveToIdle m_toIdle;
@@ -80,6 +93,9 @@ class State_TurnUp
 {
 public:
 	State_TurnUp();
+
+	void OnEnter() final;
+	void SetOwnerType(bool isHostPlayer) final;
 
 private:
 	TurnUpToIdle m_toIdle;
@@ -96,6 +112,9 @@ class State_TurnFloating
 public:
 	State_TurnFloating();
 
+	void OnEnter() final;
+	void SetOwnerType(bool isHostPlayer) final;
+
 private:
 	TurnFloatingToFloating m_toFloating;
 };
@@ -107,7 +126,9 @@ class State_Crash
 {
 public:
 	State_Crash();
+
 	void OnEnter() final;
+	void SetOwnerType(bool isHostPlayer) final;
 
 private:
 	CrashToTurnMove m_toTurnMove;
@@ -121,7 +142,9 @@ class State_GetItem
 {
 public:
 	State_GetItem();
+
 	void OnEnter() final;
+	void SetOwnerType(bool isHostPlayer) final;
 
 private:
 	GetItemToTurnMove m_toTurnMove;

@@ -14,6 +14,7 @@ public:
 	std::string m_NodeName;
 	std::vector<AnimationKey> m_AnimationKey;
 
+	bool* m_bIsLoop;
 	int frameIndex = 0;
 
 public:
@@ -39,6 +40,7 @@ public:
 	std::string FilePath;
 	std::string Name;
 
+	bool m_animLoop = true;
 	double m_Duration = 0;
 	double m_TicksPerSecond = 0;
 };

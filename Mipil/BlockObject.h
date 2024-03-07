@@ -9,7 +9,7 @@ class BlockObject
 {
 public:
 	BlockObject() = default;
-	~BlockObject() = default;
+	~BlockObject() override = default;
 
 	void SetFilePath(std::string_view filePath) { m_filePath = filePath; }
 	void SetBlockPOD(std::shared_ptr<BlockPOD> pod) { m_blockPOD = pod; }

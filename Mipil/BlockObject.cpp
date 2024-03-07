@@ -2,7 +2,9 @@
 #include "BlockObject.h"
 
 #include "BlockPOD.h"
+
 #include "../Engine/StaticMeshComponent.h"
+#include "../Engine/RigidStaticComponent.h"
 
 void BlockObject::Initialize()
 {
@@ -10,12 +12,15 @@ void BlockObject::Initialize()
 	meshComponent->SetFilePath(m_filePath);
 	SetRootComponent(meshComponent);
 
-	// TODO : position 단위.. 맞춰야 함
 	meshComponent->SetLocalPosition(m_blockPOD->position);
-	meshComponent->SetLocalRotation(m_blockPOD->rotation);
+	meshComponent->SetLocalRotation({ -XMConvertToDegrees(m_blockPOD->rotation.ToEuler().x), -XMConvertToDegrees(m_blockPOD->rotation.ToEuler().y), -XMConvertToDegrees(m_blockPOD->rotation.ToEuler().z) });
 	meshComponent->SetLocalScale(m_blockPOD->scale);
 
+	auto BoxRigidBody = CreateComponent<RigidStaticComponent>("Level_Rigidbody");
+	BoxRigidBody.lock()->CreateStaticRigidBody(RigidBodyComponent::Geometry::Box, { 90.f, 90.f, 90.f }, { 0.5f, 0.5f, 0.0f });
+
 	GameObject::Initialize();
+
 }
 
 void BlockObject::Update(float deltaTime)

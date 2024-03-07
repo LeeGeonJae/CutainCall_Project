@@ -5,6 +5,7 @@ class UIMeshComponent;
 class SkeletalMeshComponent;
 class MaterialManagerComponent;
 class ParticleComponent;
+class StaticMeshComponent;
 
 using namespace std;
 
@@ -19,6 +20,7 @@ public:
     void ChangedMaterial();
     void ChangedUIMaterial();
     void PlayParticle();
+    void ChangedMeshOutLine();
 
 private:
     std::shared_ptr<UIMeshComponent> m_PlayerOneMeshComponent;

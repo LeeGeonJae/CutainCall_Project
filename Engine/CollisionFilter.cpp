@@ -22,6 +22,20 @@ PxFilterFlags CollisionFilter::FilterShader(PxFilterObjectAttributes attributes0
 		if ((group0 == TYPE_BIT(eObjectType::PLAYER) && group1 == TYPE_BIT(eObjectType::LEVEL)) ||
 			(group0 == TYPE_BIT(eObjectType::LEVEL)) && group1 == TYPE_BIT(eObjectType::PLAYER))
 		{
+			pairFlags |= PxPairFlag::eNOTIFY_CONTACT_POINTS;
+			return PxFilterFlag::eDEFAULT;
+		}
+
+		if ((group0 == TYPE_BIT(eObjectType::PLAYER) && group1 == TYPE_BIT(eObjectType::PLAYER)))
+		{
+			pairFlags |= PxPairFlag::eNOTIFY_CONTACT_POINTS;
+			return PxFilterFlag::eDEFAULT;
+		}
+
+		if ((group0 == TYPE_BIT(eObjectType::PLAYER) && group1 == TYPE_BIT(eObjectType::HOLLOWBOX)) ||
+			(group0 == TYPE_BIT(eObjectType::HOLLOWBOX) && group1 == TYPE_BIT(eObjectType::PLAYER)))
+		{
+			pairFlags |= PxPairFlag::eNOTIFY_CONTACT_POINTS;
 			return PxFilterFlag::eDEFAULT;
 		}
 

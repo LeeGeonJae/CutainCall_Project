@@ -69,24 +69,21 @@ void CollisionEventCallback::onTrigger(PxTriggerPair* pairs, PxU32 count)
 
 void CollisionEventCallback::HandleContactEvent(std::shared_ptr<CollisionHandler> handler, std::weak_ptr<GameObject> actor, std::weak_ptr<GameObject> otherActor, const physx::PxContactPair& cp) {
 	if (cp.events & physx::PxPairFlag::eNOTIFY_TOUCH_FOUND) {
-		handler->OnEnter(actor, otherActor);
+		handler->OnContactEnter(actor, otherActor, cp);
 	}
 	else if (cp.events & physx::PxPairFlag::eNOTIFY_TOUCH_PERSISTS) {
-		handler->OnStay(actor, otherActor);
+		handler->OnContactStay(actor, otherActor, cp);
 	}
 	else if (cp.events & physx::PxPairFlag::eNOTIFY_TOUCH_LOST) {
-		handler->OnExit(actor, otherActor);
+		handler->OnContactExit(actor, otherActor, cp);
 	}
 }
 
 void CollisionEventCallback::HandleTriggerEvent(std::shared_ptr<CollisionHandler> handler, std::weak_ptr<GameObject> triggerActor, std::weak_ptr<GameObject> otherActor, const physx::PxTriggerPair& tp) {
 	if (tp.status & physx::PxPairFlag::eNOTIFY_TOUCH_FOUND) {
-		handler->OnEnter(triggerActor, otherActor);
-	}
-	else if (tp.status & physx::PxPairFlag::eNOTIFY_TOUCH_PERSISTS) {
-		handler->OnStay(triggerActor, otherActor);
+		handler->OnTriggerEnter(triggerActor, otherActor, tp);
 	}
 	else if (tp.status & physx::PxPairFlag::eNOTIFY_TOUCH_LOST) {
-		handler->OnExit(triggerActor, otherActor);
+		handler->OnTriggerExit(triggerActor, otherActor, tp);
 	}
 }

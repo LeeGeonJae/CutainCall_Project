@@ -26,6 +26,7 @@ public:
 	virtual bool CheckTransition();
 
 	virtual void OnEnter() abstract;
+	virtual void OnExit() abstract;
 
 protected:
 	virtual void DecideFSMType() abstract;

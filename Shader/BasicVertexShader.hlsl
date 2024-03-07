@@ -34,5 +34,6 @@ PS_INPUT main(VS_INPUT Input)
     
     output.Pos = mul(output.WorldPos, View);
     output.Pos = mul(output.Pos, Projection);
+    
     return output;
 };

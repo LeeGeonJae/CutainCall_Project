@@ -10,15 +10,26 @@
 
 enum class eWorldType
 {
-	TEST,
-	TEST2,
-	TEST3,
 	MAIN,
-	ENTER_ACTION,
 	STAGE1,
+	STAGE2,
+	STAGE3,
+	STAGE4,
+	STAGE5,
+
+	//TEST,
+	//TEST2,
+	//TEST3,
+	STARTCUTSCECNE,
+	STARTFREEWORLD,
+	ENDCUTSCENE,
+	ENDFREEWORLD,
+	CREDIT,
+	GAMEOVERWORLD,
 
 	END
 };
+
 
 class StaticMeshModel;
 class SkeletalMeshModel;
@@ -46,8 +57,11 @@ public:
 	void SetWorldType(eWorldType worldType) { m_worldType = worldType; }
 	void SetName(std::string_view name) { m_name = name; }
 
+	std::shared_ptr<UIManager> GetUIManager() { return m_UIManager; }
+
 public:
 	void DeleteGameObject(std::string_view name);
+	void DeleteGameObject(const std::shared_ptr<GameObject> gameObj);
 
 	virtual void Update(float deltaTime);
 
@@ -71,7 +85,7 @@ protected:
 
 	std::vector<std::shared_ptr<GameObject>> m_gameObjects[static_cast<int>(eObjectType::END)];
 	std::unordered_map<std::string, std::pair<eObjectType, int>> m_objectMap;
-	std::unique_ptr<UIManager> m_UIManager;
+	std::shared_ptr<UIManager> m_UIManager;
 
 public:
 	template <typename T>

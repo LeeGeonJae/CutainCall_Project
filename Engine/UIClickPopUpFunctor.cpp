@@ -4,6 +4,8 @@
 
 void UIClickPopUpFunctor::Execute(UIObject& onwer, float deltaTime)
 {
+	__super::Execute(onwer, deltaTime);
+
 	m_TargetUI.lock()->SetVisible(true);
 
 	auto& targetChildren = m_TargetUI.lock()->GetChildren();

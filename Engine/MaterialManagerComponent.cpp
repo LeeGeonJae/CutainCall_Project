@@ -55,8 +55,11 @@ void MaterialManagerComponent::ChangedMaterial(std::weak_ptr<SkeletalMeshCompone
 	m_SkeletalMeshComponent = meshComponent;
 	m_CurrentMaterial = ResourceManager::GetInstance()->CreateMaterial(changedMaterialName).get();
 
+	if (m_PreviousMaterial == nullptr)
+		m_PreviousMaterial = meshComponent.lock()->GetSkeletalMeshModel()->GetMaterial(instanceNumber);
+
 	// 해당 메시의 컴포넌트에 머터리얼을 세팅하면 이전의 머터리얼을 반환한다.
-	m_PreviousMaterial = m_SkeletalMeshComponent.lock()->SetMaterial(m_CurrentMaterial, m_MeshInstanceNumber);
+	m_SkeletalMeshComponent.lock()->SetMaterial(m_CurrentMaterial, m_MeshInstanceNumber);
 }
 
 
@@ -69,10 +72,14 @@ void MaterialManagerComponent::ChangedMaterial(std::weak_ptr<UIMeshComponent> me
 	m_DurationTime = 0.f;
 
 	m_UIMeshComponent = meshComponent;
+
+	if (m_PreviousMaterial == nullptr)
+		m_PreviousMaterial = meshComponent.lock()->GetSkeletalMeshModel()->GetMaterial(instanceNumber);
+
 	m_CurrentMaterial = ResourceManager::GetInstance()->CreateMaterial(changedMaterialName).get();
 
 	// 해당 메시의 컴포넌트에 머터리얼을 세팅하면 이전의 머터리얼을 반환한다.
-	m_PreviousMaterial = m_UIMeshComponent.lock()->SetMaterial(m_CurrentMaterial, m_MeshInstanceNumber);
+	m_UIMeshComponent.lock()->SetMaterial(m_CurrentMaterial, m_MeshInstanceNumber);
 }
 
 

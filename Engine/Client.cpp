@@ -95,7 +95,6 @@ void ClientNetworkManager::Update()
 
 void ClientNetworkManager::NetUpdate()
 {
-    // todo 채원: RecvQueue는 WorldManager에서 관리하는 것이 좋을듯, 그리고 World 바뀔 때마다 queue 초기화
     while(!WorldManager::GetInstance()->IsSendQueueEmpty())
     {
         std::pair<char*, int> value;
@@ -153,39 +152,30 @@ void ClientNetworkManager::CleanUp()
     ::WSACleanup();
 }
 
-void ClientNetworkManager::Read(char* buf)
+void ClientNetworkManager::Read(char* pData)
 {
     if (m_recvBytes < 2)
         return;
 
     short sizeInfo;
-    memcpy(&sizeInfo, buf, 2);
+    memcpy(&sizeInfo, pData, 2);
 
-    if (sizeInfo == m_recvBytes)
+    do
     {
-        // 완료된 스트림 버퍼를 새롭게 생성해서 memcpy 후 queue에 push
         char* packet = new char[RCV_BUF_SIZE];
-        memcpy(packet, buf, m_recvBytes);
-        WorldManager::GetInstance()->PushRecvQueue(packet, sizeInfo);
-        m_recvBytes = 0;
-        printf("readBuffer: %s \n", m_recvBuffer);
-    }
-    else if (sizeInfo > m_recvBytes)
-    {
-        printf("아직이다");
-    }
-    else if (sizeInfo < m_recvBytes)
-    {
-        //todo 채원 : 여기 바꿔줍시당. mem..move..
-        char* packet = new char[m_recvBytes];
+        memcpy(packet, pData, sizeInfo);
         WorldManager::GetInstance()->PushRecvQueue(packet, sizeInfo);
         m_recvBytes -= sizeInfo;
         memmove(m_recvBuffer, m_recvBuffer + sizeInfo, RCV_BUF_SIZE);
-        Read(m_recvBuffer);
-    }
+
+        if (m_recvBytes <= 0)
+            break;
+    } while (sizeInfo >= m_recvBytes);
+
+    m_recvBytes = 0;
 }
 
-void ClientNetworkManager::Write(char* buf)
+void ClientNetworkManager::Write(char* buf, int len)
 {
 }
 

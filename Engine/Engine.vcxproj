@@ -183,16 +183,12 @@
     <ClInclude Include="MaterialManagerComponent.h" />
     <ClInclude Include="ParticleComponent.h" />
     <ClInclude Include="PhysicsManager.h" />
-    <ClInclude Include="PlayerTestController.h" />
     <ClInclude Include="RigidBodyComponent.h" />
     <ClInclude Include="RigidDynamicComponent.h" />
     <ClInclude Include="RigidStaticComponent.h" />
     <ClInclude Include="SoundManager.h" />
-    <ClInclude Include="TestCollisionHandler.h" />
-    <ClInclude Include="UICameraMove.h" />
+    <ClInclude Include="UIClickFunctor.h" />
     <ClInclude Include="UIClickPopUpFunctor.h" />
-    <ClInclude Include="UIDynamicObject.h" />
-    <ClInclude Include="UIEndGameClick.h" />
     <ClInclude Include="UIFunctorFactory.h" />
     <ClInclude Include="GameObject.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
@@ -216,18 +212,13 @@
     <ClInclude Include="UIButton.h" />
     <ClInclude Include="UIFunctor.h" />
     <ClInclude Include="UIFunctorPopUp.h" />
-    <ClInclude Include="UIGameStartClick.h" />
-    <ClInclude Include="UIMainWorldButtonHover.h" />
     <ClInclude Include="UIHoverPopUpFunctor.h" />
     <ClInclude Include="UIManager.h" />
-    <ClInclude Include="UIClickFunctor.h" />
     <ClInclude Include="UIHoverFunctor.h" />
     <ClInclude Include="UIMeshComponent.h" />
     <ClInclude Include="UIObject.h" />
     <ClInclude Include="UIPanel.h" />
-    <ClInclude Include="UITimerFunctor.h" />
     <ClInclude Include="UITriggerPopUp.h" />
-    <ClInclude Include="UITest.h" />
     <ClInclude Include="UIText.h" />
     <ClInclude Include="World.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
@@ -254,17 +245,13 @@
     <ClCompile Include="MaterialManagerComponent.cpp" />
     <ClCompile Include="ParticleComponent.cpp" />
     <ClCompile Include="PhysicsManager.cpp" />
-    <ClCompile Include="PlayerTestController.cpp" />
     <ClCompile Include="RigidBodyComponent.cpp" />
     <ClCompile Include="RigidDynamicComponent.cpp" />
     <ClCompile Include="RigidStaticComponent.cpp" />
     <ClCompile Include="SoundManager.cpp" />
-    <ClCompile Include="TestCollisionHandler.cpp" />
     <ClCompile Include="UIButton.cpp" />
-    <ClCompile Include="UICameraMove.cpp" />
+    <ClCompile Include="UIClickFunctor.cpp" />
     <ClCompile Include="UIClickPopUpFunctor.cpp" />
-    <ClCompile Include="UIDynamicObject.cpp" />
-    <ClCompile Include="UIEndGameClick.cpp" />
     <ClCompile Include="UIFunctorFactory.cpp" />
     <ClCompile Include="GameObject.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
@@ -291,18 +278,13 @@
     <ClCompile Include="Transform.cpp" />
     <ClCompile Include="UIFunctor.cpp" />
     <ClCompile Include="UIFunctorPopUp.cpp" />
-    <ClCompile Include="UIGameStartClick.cpp" />
-    <ClCompile Include="UIMainWorldButtonHover.cpp" />
     <ClCompile Include="UIHoverPopUpFunctor.cpp" />
     <ClCompile Include="UIManager.cpp" />
-    <ClCompile Include="UIClickFunctor.cpp" />
     <ClCompile Include="UIHoverFunctor.cpp" />
     <ClCompile Include="UIMeshComponent.cpp" />
     <ClCompile Include="UIObject.cpp" />
     <ClCompile Include="UIPanel.cpp" />
-    <ClCompile Include="UITimerFunctor.cpp" />
     <ClCompile Include="UITriggerPopUp.cpp" />
-    <ClCompile Include="UITest.cpp" />
     <ClCompile Include="UIText.cpp" />
     <ClCompile Include="World.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>

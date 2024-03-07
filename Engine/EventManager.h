@@ -11,6 +11,7 @@
 enum class eEventType
 {
 	CHANGE_WORLD,
+	GO_TO_PREV_WORLD,
 	DELETE_OBJECT,
 
 	// PlayerObject > Transition 전달 정보
@@ -23,8 +24,14 @@ enum class eEventType
 	// State > SkeletalMeshComponent 전달 정보
 	CHANGE_ANIMATION,
 
+	// 그리드 무브먼트
 	MOVE_ON_GRID,
 	CRASH_ON_GRID,
+
+	PLAY_CRASH_PARTICLE,
+	PLAY_FIRE_PARTICLE,
+
+	SET_PRE_STATE,
 
 	END
 };
@@ -64,10 +71,13 @@ public:
 	}
 
 	template <typename... Args>
-	void SendImmediateEvent(eEventType eventId, Args... args)
+	void SendImmediateEvent(eEventType eventId, EventListener* listener, Args... args)
 	{
 		Event* event = new Event(args...);
 		event->eventID = eventId;
+
+		if (listener)
+			listener->HandleEvent(event);
 
 		std::pair<std::multimap<eEventType, EventListener*>::iterator,
 			std::multimap<eEventType, EventListener*>::iterator> range;

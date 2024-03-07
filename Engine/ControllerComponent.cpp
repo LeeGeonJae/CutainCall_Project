@@ -21,6 +21,11 @@ void ControllerComponent::Update(float deltaTime)
 	}
 }
 
+void ControllerComponent::ClearControllers()
+{
+	m_InputOperations.clear();
+}
+
 void ControllerComponent::OnInputProcess(const Keyboard::State& KeyState, const Keyboard::KeyboardStateTracker& KeyTracker, const Mouse::State& MouseState, const Mouse::ButtonStateTracker& MouseTracker)
 {
 	for (auto& it : m_InputOperations)

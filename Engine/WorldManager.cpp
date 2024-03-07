@@ -5,21 +5,39 @@
 
 #include <Winsock2.h>
 
-WorldManager::WorldManager()
-{
-	m_worlds.reserve(static_cast<UINT>(eWorldType::END));
-}
-
 void WorldManager::ChangeWorld(eWorldType worldType)
 {
 	CommonApp::m_pInstance->GetRenderer()->ClearWorldResource();
+
+	std::pair<char*, int> value1;
+	while (m_recvQueue.try_pop(value1))
+	{
+		delete[] value1.first;
+	}
+	std::pair<char*, int> value2;
+	while (m_recvQueue.try_pop(value2))
+	{
+		delete[] value2.first;
+	}
 
 	m_prevWorld = m_currentWorld;
 	assert(m_worlds[static_cast<int>(worldType)]);
 	m_currentWorld = m_worlds[static_cast<int>(worldType)];
 
-	m_currentWorld->OnEnter();
 	m_prevWorld->OnExit();
+	m_currentWorld->OnEnter();
+}
+
+void WorldManager::GoToPrevWorld()
+{
+	CommonApp::m_pInstance->GetRenderer()->ClearWorldResource();
+
+	std::shared_ptr<World> temp = m_prevWorld;
+	m_prevWorld = m_currentWorld;
+	m_currentWorld = temp;
+
+	m_prevWorld->OnExit();
+	m_currentWorld->OnEnter();
 }
 
 void WorldManager::ProcessPacket(char* pData, PacketHeader& packet) 

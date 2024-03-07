@@ -27,6 +27,14 @@ FMOD::Sound* SoundManager::LoadSound(std::string filePath, FMOD_MODE mode)
 	return sound;
 }
 
+void SoundManager::StopAllSound()
+{
+	for (auto& chennel : m_playingchannels)
+	{
+		chennel->setPaused(true);
+	}
+}
+
 void SoundManager::PlaySound(FMOD::Sound* sound)
 {
 	FMOD::Channel* channel;

@@ -4,9 +4,6 @@
     <Filter Include="0. pch">
       <UniqueIdentifier>{e0eb07ba-97e1-4785-8c77-d54cd038a09d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="1. Core">
-      <UniqueIdentifier>{1d880232-ff03-4092-a1d3-5c60077b3a5c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="2. Manager">
       <UniqueIdentifier>{537d4b53-8bc9-443a-b947-d79108a171cc}</UniqueIdentifier>
     </Filter>
@@ -85,9 +82,6 @@
     <Filter Include="5. Component\SceneComponent\RenderComponent\SkeletalMeshComponent">
       <UniqueIdentifier>{b6619852-a37a-40a6-a933-c2e414b6f629}</UniqueIdentifier>
     </Filter>
-    <Filter Include="9. UI\UITest">
-      <UniqueIdentifier>{5ca2a686-5506-4610-9388-4dcd3d21d1dd}</UniqueIdentifier>
-    </Filter>
     <Filter Include="10. FSM">
       <UniqueIdentifier>{1c231f9c-9478-471a-a9c3-07b24e1b8c2e}</UniqueIdentifier>
     </Filter>
@@ -138,32 +132,8 @@
     <Filter Include="9. UI\0. UIFunctor\UIHoverFunctor\UIHoverPopUpFunctor">
       <UniqueIdentifier>{016b4727-3e13-4832-b86d-3453e27862ed}</UniqueIdentifier>
     </Filter>
-    <Filter Include="9. UI\0. UIFunctor\UIHoverFunctor\UIMainWorldButtonHover">
-      <UniqueIdentifier>{58e232fd-505c-4235-90ac-3b6c2da872a3}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="9. UI\0. UIFunctor\UIClickFunctor\UIGameStartClick">
-      <UniqueIdentifier>{01756e07-d08a-4473-972c-8670be324b3b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="5. Component\SceneComponent\RenderComponent\ParticleComponent">
       <UniqueIdentifier>{bebf1598-874a-414f-913c-ff2c779c74f7}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="9. UI\UICameraMove">
-      <UniqueIdentifier>{9ba7174f-8a24-46fd-ad53-5eb075b060fe}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="9. UI\UIDynamicObject">
-      <UniqueIdentifier>{a141edee-2a49-49ce-82c6-e81834b04694}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="9. UI\0. UIFunctor\UIFunctor">
-      <UniqueIdentifier>{4bd06b3e-f6ef-4851-ace6-078ef4290ee5}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="9. UI\0. UIFunctor\UIFunctor\UITimerFunctor">
-      <UniqueIdentifier>{43c63c5e-9e12-4111-aa3d-d82bd9e51326}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="9. UI\0. UIFunctor\UIClickFunctor\UIEndGameClick">
-      <UniqueIdentifier>{77734278-3b2f-4db3-8cd1-ec88a26c1b93}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="5. Component\ControllerComponent\Controller\PlayerTestController">
-      <UniqueIdentifier>{0d5891a2-efec-4f9f-b1a2-0795ab9529fd}</UniqueIdentifier>
     </Filter>
     <Filter Include="5. Component\RigidBodyComponent">
       <UniqueIdentifier>{63acc92e-5e71-4dc8-9f6a-ad591a6a9e59}</UniqueIdentifier>
@@ -175,20 +145,20 @@
     <Filter Include="5. Component\SceneComponent\RenderComponent\UIMeshComponent">
       <UniqueIdentifier>{94c98fcf-d43c-47fd-81ac-8186584b55fc}</UniqueIdentifier>
     </Filter>
-    <Filter Include="2. Manager\PhysicsManager\CollisionEventCallback">
-      <UniqueIdentifier>{42a3e163-6efb-4240-9621-36e1c35bf20c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="2. Manager\PhysicsManager\CollisionHandler">
-      <UniqueIdentifier>{30101495-00ce-4194-affb-a66fa0e5d536}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="2. Manager\PhysicsManager\CollisionHandler\TestCollisionHandler">
-      <UniqueIdentifier>{5f923006-45aa-46a5-b695-220ef5019ec3}</UniqueIdentifier>
-    </Filter>
     <Filter Include="2. Manager\PhysicsManager\CollisionFilter">
       <UniqueIdentifier>{c54ff148-2033-4513-8429-27a4c2d41045}</UniqueIdentifier>
     </Filter>
-    <Filter Include="5. Component\MaterialManagerComponent">
+    <Filter Include="5. Component\SceneComponent\MaterialManagerComponent">
       <UniqueIdentifier>{28b41d5f-9d03-4ee2-819f-13eaa1c4240e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="2. Manager\PhysicsManager\CollisionEventCallback">
+      <UniqueIdentifier>{42a3e163-6efb-4240-9621-36e1c35bf20c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="5. Component\RigidBodyComponent\CollisionHandler">
+      <UniqueIdentifier>{30101495-00ce-4194-affb-a66fa0e5d536}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="1. Core">
+      <UniqueIdentifier>{1d880232-ff03-4092-a1d3-5c60077b3a5c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -288,17 +258,11 @@
     <ClInclude Include="UIHoverFunctor.h">
       <Filter>9. UI\0. UIFunctor\UIHoverFunctor</Filter>
     </ClInclude>
-    <ClInclude Include="UIClickFunctor.h">
-      <Filter>9. UI\0. UIFunctor\UIClickFunctor</Filter>
-    </ClInclude>
     <ClInclude Include="UIFunctorFactory.h">
       <Filter>9. UI\0. UIFunctor\0. UIFunctorFactory</Filter>
     </ClInclude>
     <ClInclude Include="SkeletalMeshComponent.h">
       <Filter>5. Component\SceneComponent\RenderComponent\SkeletalMeshComponent</Filter>
-    </ClInclude>
-    <ClInclude Include="UITest.h">
-      <Filter>9. UI\UITest</Filter>
     </ClInclude>
     <ClInclude Include="FSM.h">
       <Filter>10. FSM</Filter>
@@ -345,12 +309,6 @@
     <ClInclude Include="UIFunctorPopUp.h">
       <Filter>9. UI\UIPopUp</Filter>
     </ClInclude>
-    <ClInclude Include="UIGameStartClick.h">
-      <Filter>9. UI</Filter>
-    </ClInclude>
-    <ClInclude Include="UIMainWorldButtonHover.h">
-      <Filter>9. UI</Filter>
-    </ClInclude>
     <ClInclude Include="ParticleComponent.h">
       <Filter>5. Component\SceneComponent\RenderComponent\ParticleComponent</Filter>
     </ClInclude>
@@ -366,21 +324,6 @@
     <ClInclude Include="RigidBodyComponent.h">
       <Filter>5. Component\RigidBodyComponent</Filter>
     </ClInclude>
-    <ClInclude Include="UICameraMove.h">
-      <Filter>9. UI\UICameraMove</Filter>
-    </ClInclude>
-    <ClInclude Include="UIDynamicObject.h">
-      <Filter>9. UI\UIDynamicObject</Filter>
-    </ClInclude>
-    <ClInclude Include="UITimerFunctor.h">
-      <Filter>9. UI\0. UIFunctor\UIFunctor\UITimerFunctor</Filter>
-    </ClInclude>
-    <ClInclude Include="UIEndGameClick.h">
-      <Filter>9. UI\0. UIFunctor\UIClickFunctor\UIEndGameClick</Filter>
-    </ClInclude>
-    <ClInclude Include="PlayerTestController.h">
-      <Filter>5. Component\ControllerComponent\Controller\PlayerTestController</Filter>
-    </ClInclude>
     <ClInclude Include="UIMeshComponent.h">
       <Filter>5. Component\SceneComponent\RenderComponent\UIMeshComponent</Filter>
     </ClInclude>
@@ -388,16 +331,16 @@
       <Filter>2. Manager\PhysicsManager\CollisionEventCallback</Filter>
     </ClInclude>
     <ClInclude Include="CollisionHandler.h">
-      <Filter>2. Manager\PhysicsManager\CollisionHandler</Filter>
-    </ClInclude>
-    <ClInclude Include="TestCollisionHandler.h">
-      <Filter>2. Manager\PhysicsManager\CollisionHandler\TestCollisionHandler</Filter>
+      <Filter>5. Component\RigidBodyComponent\CollisionHandler</Filter>
     </ClInclude>
     <ClInclude Include="CollisionFilter.h">
       <Filter>2. Manager\PhysicsManager\CollisionFilter</Filter>
     </ClInclude>
     <ClInclude Include="MaterialManagerComponent.h">
-      <Filter>5. Component\MaterialManagerComponent</Filter>
+      <Filter>5. Component\SceneComponent\MaterialManagerComponent</Filter>
+    </ClInclude>
+    <ClInclude Include="UIClickFunctor.h">
+      <Filter>9. UI\0. UIFunctor\UIClickFunctor</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -482,9 +425,6 @@
     <ClCompile Include="UIHoverFunctor.cpp">
       <Filter>9. UI\0. UIFunctor\UIHoverFunctor</Filter>
     </ClCompile>
-    <ClCompile Include="UIClickFunctor.cpp">
-      <Filter>9. UI\0. UIFunctor\UIClickFunctor</Filter>
-    </ClCompile>
     <ClCompile Include="UIFunctorFactory.cpp">
       <Filter>9. UI\0. UIFunctor\0. UIFunctorFactory</Filter>
     </ClCompile>
@@ -493,9 +433,6 @@
     </ClCompile>
     <ClCompile Include="UIButton.cpp">
       <Filter>9. UI\UIButton</Filter>
-    </ClCompile>
-    <ClCompile Include="UITest.cpp">
-      <Filter>9. UI\UITest</Filter>
     </ClCompile>
     <ClCompile Include="FSM.cpp">
       <Filter>10. FSM</Filter>
@@ -548,35 +485,14 @@
     <ClCompile Include="RigidBodyComponent.cpp">
       <Filter>5. Component\RigidBodyComponent</Filter>
     </ClCompile>
-    <ClCompile Include="UIGameStartClick.cpp">
-      <Filter>9. UI</Filter>
-    </ClCompile>
-    <ClCompile Include="UIMainWorldButtonHover.cpp">
-      <Filter>9. UI</Filter>
-    </ClCompile>
     <ClCompile Include="ParticleComponent.cpp">
       <Filter>5. Component\SceneComponent\RenderComponent\ParticleComponent</Filter>
-    </ClCompile>
-    <ClCompile Include="UICameraMove.cpp">
-      <Filter>9. UI\UICameraMove</Filter>
-    </ClCompile>
-    <ClCompile Include="UIDynamicObject.cpp">
-      <Filter>9. UI\UIDynamicObject</Filter>
     </ClCompile>
     <ClCompile Include="UIGameStartClick.cpp">
       <Filter>9. UI\0. UIFunctor\UIClickFunctor\UIGameStartClick</Filter>
     </ClCompile>
     <ClCompile Include="UIMainWorldButtonHover.cpp">
       <Filter>9. UI\0. UIFunctor\UIHoverFunctor\UIMainWorldButtonHover</Filter>
-    </ClCompile>
-    <ClCompile Include="UITimerFunctor.cpp">
-      <Filter>9. UI\0. UIFunctor\UIFunctor\UITimerFunctor</Filter>
-    </ClCompile>
-    <ClCompile Include="UIEndGameClick.cpp">
-      <Filter>9. UI\0. UIFunctor\UIClickFunctor\UIEndGameClick</Filter>
-    </ClCompile>
-    <ClCompile Include="PlayerTestController.cpp">
-      <Filter>5. Component\ControllerComponent\Controller\PlayerTestController</Filter>
     </ClCompile>
     <ClCompile Include="UIMeshComponent.cpp">
       <Filter>5. Component\SceneComponent\RenderComponent\UIMeshComponent</Filter>
@@ -585,16 +501,16 @@
       <Filter>2. Manager\PhysicsManager\CollisionEventCallback</Filter>
     </ClCompile>
     <ClCompile Include="CollisionHandler.cpp">
-      <Filter>2. Manager\PhysicsManager\CollisionHandler</Filter>
-    </ClCompile>
-    <ClCompile Include="TestCollisionHandler.cpp">
-      <Filter>2. Manager\PhysicsManager\CollisionHandler\TestCollisionHandler</Filter>
+      <Filter>5. Component\RigidBodyComponent\CollisionHandler</Filter>
     </ClCompile>
     <ClCompile Include="CollisionFilter.cpp">
       <Filter>2. Manager\PhysicsManager\CollisionFilter</Filter>
     </ClCompile>
     <ClCompile Include="MaterialManagerComponent.cpp">
-      <Filter>5. Component\MaterialManagerComponent</Filter>
+      <Filter>5. Component\SceneComponent\MaterialManagerComponent</Filter>
+    </ClCompile>
+    <ClCompile Include="UIClickFunctor.cpp">
+      <Filter>9. UI\0. UIFunctor\UIClickFunctor</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -46,7 +46,7 @@ bool ModelResource::ReadFile(std::string filePath, ModelType modelType)
 			aiProcess_PreTransformVertices |  // 계층구조 노드들의 각각 포지션을 받아와서 적용된 상태로 함
 			aiProcess_ConvertToLeftHanded;   // 왼손 좌표계로 변환
 	}
-	
+
 	const aiScene* fbxModel = importer.ReadFile(filePath, importFlags);
 
 	if (!fbxModel)
@@ -78,22 +78,19 @@ bool ModelResource::ReadFile(std::string filePath, ModelType modelType)
 		}
 		else if (modelType == ModelType::SKELETAL)
 		{
-			if (fbxMesh->HasBones())
-				m_Meshes[i].CreateBoneWeight(fbxMesh, &m_Skeleton);
-			else
-				m_Meshes[i].Create(fbxMesh);
+			m_Meshes[i].CreateBoneWeight(fbxMesh, &m_Skeleton);
 		}
 	}
 
 	// SceneResource의 기본 애니메이션 추가한다.
 	// ToDO :: 재현  애니메이션 개수가 여러개일 경우 처리해주기.
-	// assert(fbxModel->mNumAnimations < 2); // 애니메이션은 없거나 1개여야한다. 
+	 //assert(fbxModel->mNumAnimations < 2); // 애니메이션은 없거나 1개여야한다. 
 	// 노드의 애니메이션을 하나로 합치는 방법은 FBX export에서 NLA스트립,모든 액션 옵션을 끕니다.
 	if (fbxModel->HasAnimations())
 	{
 		const aiAnimation* pAiAnimation = fbxModel->mAnimations[0];
 		// 채널수는 aiAnimation 안에서 애니메이션 정보를  표현하는 aiNode의 개수이다.
-		//assert(pAiAnimation->mNumChannels > 1); // 애니메이션이 있다면 aiNode 는 하나 이상 있어야한다.
+		assert(pAiAnimation->mNumChannels >= 1); // 애니메이션이 있다면 aiNode 는 하나 이상 있어야한다.
 
 		shared_ptr<Animation> anim = make_shared<Animation>();
 		anim->Create(filePath, pAiAnimation);
@@ -126,3 +123,7 @@ Material* ModelResource::GetMeshMaterial(UINT index)
 	return &m_Materials[mindex];
 }
 
+Math::Vector3 ModelResource::GetBoundingBoxDimensions() const
+{
+	return Math::Vector3(m_AABBmax.x - m_AABBmin.x, m_AABBmax.y - m_AABBmin.y, m_AABBmax.z - m_AABBmin.z);
+}

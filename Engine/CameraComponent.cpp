@@ -22,13 +22,12 @@ void CameraComponent::Update(float deltaTime)
 {
 	__super::Update(deltaTime);
 
-	//ToDo 우선 주석처리 해놨음.
 	CommonApp::m_pInstance->GetRenderer()->SetViewMatrix(GetViewMatrix());
 	CommonApp::m_pInstance->GetRenderer()->SetCamMatrix(GetLocalPosition());
 }
 
 Math::Matrix CameraComponent::GetViewMatrix() const
-{	
+{
    	return (m_worldMatrix.Invert());
 
 	//or

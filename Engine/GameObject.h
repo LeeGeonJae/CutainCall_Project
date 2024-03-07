@@ -1,10 +1,9 @@
 #pragma once
 
-#include "Object.h"
-
 #include <memory>
 #include <unordered_map>
 
+#include "Object.h"
 #include "Component.h"
 
 class World;
@@ -15,9 +14,15 @@ enum class eObjectType
 {
 	TEST,
 	PLANE,
+	MAP,
 	LEVEL,
+	HOLLOWBOX,
+	PART,
 	PLAYER,
+	PARTICLE,
 	CAMERA,
+	EMPTY,
+	READYTRIGGER,
 
 	END
 };
@@ -39,20 +44,27 @@ public:
 	void SetName(std::string_view name) { m_name = name; }
 	void SetObjectType(eObjectType type) { m_objectType = type; }
 	void SetOwnerWorld(std::shared_ptr<World> pWorld) { m_pOwnerWorld = pWorld; }
-	void SetOwnerObject(std::shared_ptr<GameObject> pObject) { m_pOwnerObj = pObject; }
+	void SetParentObject(std::shared_ptr<GameObject> pObject) { m_pParentObj = pObject; }
+	void ResetParentObject() { m_pParentObj.reset(); }
 	void SetRootComponent(std::shared_ptr<SceneComponent> pRootcomponent) { m_pRootComponent = pRootcomponent; }
 	void SetPosition(Vector3 position);
 	void SetRotation(Vector3 rotation);
 	void SetScale(Vector3 scale);
+	void SetDeferredPosition(Vector3 position) { m_deferredPosition = position; }
+	void SetDeferredRotation(Vector3 rotation) { m_deferredRotation = rotation; }
 
-	std::string GetName() const { return m_name; }
+	std::string& GetName() { return m_name; }
 	eObjectType GetObjectType() const { return m_objectType; }
 	std::weak_ptr<World> GetOwnerWorld() const { return m_pOwnerWorld; }
+	std::weak_ptr<GameObject> GetParentObject() const { return m_pParentObj; }
 	std::weak_ptr<SceneComponent> GetRootComponent() const { return m_pRootComponent; }
 	std::weak_ptr<Component> GetComponent(std::string_view name) const;
-	const Vector3& GetPosition() const;
-	const Vector3& GetRotation() const;
-	const Vector3& GetScale() const;
+	const Vector3& GetLocalPosition() const;
+	const Vector3& GetLocalRotation() const;
+	const Vector3& GetLocalScale() const;
+	const Vector3& GetWorldPosition() const;
+	const Vector3& GetWorldRotation() const;
+	const Vector3& GetWorldScale() const;
 	const Matrix& GetTransform() const;
 
 public:
@@ -65,11 +77,14 @@ protected:
 	eObjectType m_objectType = eObjectType::END;
 
 	std::weak_ptr<World> m_pOwnerWorld;
-	std::weak_ptr<GameObject> m_pOwnerObj;
+	std::weak_ptr<GameObject> m_pParentObj;
 
 	std::unordered_map<std::string, int> m_componentMap; // GetComponent 속도 향상을 위한 Query용 자료구조
 	std::vector<std::shared_ptr<Component>> m_ownComponents;
 	std::shared_ptr<SceneComponent> m_pRootComponent;	// m_pRootComponent는 m_OwnedComponent 중 하나로 설정, 대표 위치값
+
+	Vector3 m_deferredPosition; //SceneComponent Create하기 전에 밖에서 SetPosition 해줄 때 사용;
+	Vector3 m_deferredRotation; //SceneComponent Create하기 전에 밖에서 SetRotation 해줄 때 사용;
 
 public:
 	template <typename T>

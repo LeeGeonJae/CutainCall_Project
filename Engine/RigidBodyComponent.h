@@ -17,15 +17,16 @@ public:
 	enum class Geometry {
 		Sphere,
 		Capsule,
-		Box
+		Box,
+		END
 	};
 
+	virtual ~RigidBodyComponent();
 	// Component을(를) 통해 상속됨
 	void Initialize() override;
 	void Update(float deltaTime) override;
 
 protected:
-	void GetOwnerTrasnform();
 	PxTransform ConvertPxTransform();
 
 	template <Geometry Sphere>
@@ -37,9 +38,6 @@ protected:
 
 	PxMaterial* CreateMaterial(float staticFriction, float dynamicFriction, float restitution);
 	void SetCollisionFilter(PxRigidActor* actor);
-
-	Math::Vector3* m_pOwnerPosition;
-	Math::Vector3* m_pOwnerRotation;
 
 	std::shared_ptr<CollisionHandler> m_collisionHandler;
 };

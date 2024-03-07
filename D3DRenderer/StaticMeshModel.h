@@ -12,9 +12,14 @@ public:
 	~StaticMeshModel();
 
 	Material* GetMaterial(UINT index);
+	const std::vector<Mesh>& GetMeshes();
+
 	void SetWorldMatrix(Math::Matrix* worldMatrix) { m_worldMatrix = worldMatrix; }
+	void SetOutLine(bool isOutLine) { m_IsOutLine = isOutLine; }
 
 	bool ReadSceneResourceFromFBX(std::string filePath);
+
+	Math::Vector3 GetModelDimensions() const;
 
 private:
 	void SetSceneResource(std::shared_ptr<ModelResource> val);
@@ -22,6 +27,7 @@ private:
 
 public:
 	bool m_IsCulled = true;
+	bool m_IsOutLine = false;
 
 	std::string m_SceneFilePath; // BeginPlay에서 로딩
 	std::shared_ptr<ModelResource>  m_ModelResource;

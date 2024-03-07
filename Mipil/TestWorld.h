@@ -7,6 +7,7 @@
 class GridManager;
 enum class eMoveType;
 class TestPlayerObject;
+class UIPanel;
 
 class TestWorld
 	: public World
@@ -17,10 +18,10 @@ public:
 	TestWorld();
 	~TestWorld();
 
-	void Initialize() override;
-	void Update(float deltaTime) override;
 
-public:
+	std::shared_ptr<TestPlayerObject> GetOtherPlayer(TestPlayerObject* player);
+
+
 	// Network
 	void SetTurn(char* pData);
 	void StartTurn(char* pData);
@@ -29,11 +30,10 @@ public:
 	void ClientsAllReady(char* pData);
 	void CharacterMove(char* pData);
 
-	// Gird Test ¿ë
-	void MovePlayer(TestPlayerObject* player, Vector3 vec);
-	bool IsGround(Vector3 pos);
 
-public:
+	void Initialize() override;
+	void Update(float deltaTime) override;
+
 	void OnEnter() override;
 	void OnExit() override;
 
@@ -49,15 +49,17 @@ public:
 
 	///TEST
 private:
+	std::shared_ptr<TestPlayerObject> m_hostPlayer;
+	std::shared_ptr<TestPlayerObject> m_guestPlayer;
+
 	std::shared_ptr<GameObject> m_Camera;
 
 	bool m_bTurn = false;
 	bool m_bGameRun = false;
 	float m_fixedDelta = 0.0f;
 
-	std::shared_ptr<UITest> m_tFadeInOut;
+	std::shared_ptr<UIPanel> m_tFadeInOut;
 	float m_tFadeDurationTime;
 
 	std::shared_ptr<GridManager> m_gridManager;
 };
-

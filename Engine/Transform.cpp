@@ -1,5 +1,7 @@
 #include "pch.h"
 #include "Transform.h"
+#include "GameObject.h"
+#include "../Engine/RigidDynamicComponent.h"
 
 Transform::Transform()
 {

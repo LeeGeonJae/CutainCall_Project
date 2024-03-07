@@ -9,6 +9,11 @@ StaticMeshComponent::~StaticMeshComponent()
 	m_staticMeshModel.reset();
 }
 
+void StaticMeshComponent::SetOutLine(bool isOutLine)
+{
+	m_staticMeshModel->SetOutLine(isOutLine);
+}
+
 void StaticMeshComponent::Initialize()
 {
 	//assert(!m_filePath.empty());

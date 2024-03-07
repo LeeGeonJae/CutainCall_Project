@@ -30,22 +30,23 @@ CommonApp::CommonApp(HINSTANCE hInstance)
 
     m_wcex.hInstance = hInstance;
     m_wcex.cbSize = sizeof(WNDCLASSEX);
-    m_wcex.style = CS_HREDRAW | CS_VREDRAW;
+    m_wcex.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
     m_wcex.lpfnWndProc = DefaultWndProc;
     m_wcex.cbClsExtra = 0;
     m_wcex.cbWndExtra = 0;
-    m_wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
+    //m_wcex.hCursor = LoadCursorFromFile(L"../Resources/Textures/cursor1.ico");
     m_wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
     m_wcex.lpszClassName = m_szWindowClass;
-
     m_pD3DRenderer = std::make_shared<D3DRenderManager>(ScreenWidth, ScreenHeight);
+
+    //SetCursor(m_wcex.hCursor);
 }
 
 bool CommonApp::Initialize()
 {
     // 등록
     RegisterClassExW(&m_wcex);
-
+    
     RECT rcClinet = { 0, 0, ScreenWidth, ScreenHeight };
     AdjustWindowRect(&rcClinet, WS_OVERLAPPEDWINDOW, FALSE);
 
@@ -56,7 +57,7 @@ bool CommonApp::Initialize()
     const int startY = screenCenterY - ScreenHeight / 2;
 
     // 윈도우 생성
-    m_hWnd = CreateWindowW(m_szWindowClass, m_szTitle, WS_OVERLAPPEDWINDOW,
+    m_hWnd = CreateWindowW(m_szWindowClass, L"Astronut", WS_OVERLAPPEDWINDOW,
         startX, startY,                       // 시작 위치
         rcClinet.right - rcClinet.left, rcClinet.bottom - rcClinet.top,                     // 가로, 세로
         nullptr, nullptr, m_hInstance, nullptr);
@@ -97,7 +98,6 @@ bool CommonApp::Initialize()
     PhysicsManager::GetInstance()->Initailize();
     InputManager::GetInstance()->Initialize();
     SoundManager::GetInstance()->Initailize();
-
     return true;
 }
 
@@ -146,7 +146,6 @@ void CommonApp::GameLoop()
         {
             if (m_msg.message == WM_QUIT)
                 break;
-
             if (!TranslateAccelerator(m_msg.hwnd, m_hAccelTable, &m_msg))
             {
                 TranslateMessage(&m_msg);
@@ -172,7 +171,9 @@ void CommonApp::Update()
 
     m_pD3DRenderer->Update(m_deltaTime);
 
-    ShowFrameRate();
+//#ifdef ENGINE_DEBUG
+//    ShowFrameRate();
+//#endif
 }
 
 void CommonApp::Render()
@@ -199,13 +200,11 @@ LRESULT CommonApp::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 	{
 	    return true;
 	}
-
 	switch (message)
 	{
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		break;
-
 	case WM_ACTIVATEAPP:
 		DirectX::Keyboard::ProcessMessage(message, wParam, lParam);
 		DirectX::Mouse::ProcessMessage(message, wParam, lParam);
@@ -254,7 +253,8 @@ LRESULT CommonApp::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 	case WM_MOUSEACTIVATE:
 		// 마우스 클릭으로 윈도우 활성화 할 때, 마우스 클릭 입력 무시
 		return MA_ACTIVATEANDEAT;
-
+    
+    
 	default:
 		return DefWindowProc(hWnd, message, wParam, lParam);
 	}

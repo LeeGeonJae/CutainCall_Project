@@ -34,5 +34,7 @@ public:
 public:
 	bool ReadFile(std::string filePath, ModelType modelType);
 	Material* GetMeshMaterial(UINT index);
+
+	Math::Vector3 GetBoundingBoxDimensions() const;
 };
 

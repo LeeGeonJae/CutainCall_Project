@@ -8,7 +8,19 @@ enum class eEventType;
 enum class eWorldType;
 enum class eObjectType;
 
-using eventVariant = std::variant<eWorldType, eObjectType, const char*, Vector3, bool>;
+struct Event_TurnInfo
+{
+	bool isHostPlayer;
+	bool isTurn;
+};
+
+struct Event_GroundInfo
+{
+	bool isHostPlayer;
+	bool isGround;
+};
+
+using eventVariant = std::variant<eWorldType, eObjectType, const char*, Vector3, bool, Event_TurnInfo, Event_GroundInfo>;
 
 class Event
 {

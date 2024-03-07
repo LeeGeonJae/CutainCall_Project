@@ -6,10 +6,10 @@
 
 #define MAX_LEN 100
 
-enum EPacketId	: short
+enum EPacketId : short
 {
 	PACKETID_START,
-	
+
 	C2S_BROADCAST_MSG,
 	S2C_BROADCAST_MSG,
 
@@ -19,9 +19,25 @@ enum EPacketId	: short
 	// 클라가 레디 버튼 눌렀을 때
 	C2S_READY,
 
+	// 모든 클라가 스타트자유이동 목표지점에 도착했는지
+	C2S_IS_ALL_GOAL,
+	S2C_IS_ALL_GOAL,
+
+	// 모든 클라가 엔딩자유이동 목표지점에 도착했는지
+	C2S_IS_ALL_END,
+	S2C_IS_ALL_END,
+
+	// 모든 클라가 스테이지에 들어왔는지
+	C2S_IS_ALL_ENTER,
+	S2C_IS_ALL_ENTER,
+
 	// 모든 클라가 레디인지 확인
 	C2S_IS_ALL_READY,
 	S2C_IS_ALL_READY,
+
+	// 자신의 행동들을 브로드캐스트
+	C2S_BROADCAST_ACTION,
+	S2C_BROADCAST_ACTION,
 
 	// 누구턴인지 턴 세팅해주기
 	C2S_SET_TURN,
@@ -30,10 +46,6 @@ enum EPacketId	: short
 	// 턴 시작이다
 	C2S_START_TURN,
 	S2C_START_TURN,
-
-	// 턴 끝이다
-	C2S_END_TURN,
-	S2C_END_TURN,
 
 	// 턴 바꾸기
 	C2S_CHANGE_TURN,
@@ -47,15 +59,19 @@ enum EPacketId	: short
 	C2S_END_ACTION,
 	S2C_END_ACTION,
 
-	// 캐릭터가 어디로 이동하는지 서버에 알리기
-	C2S_CHARACTER_MOVE,
-	S2C_CHARACTER_MOVE,
+	// 움직임이 끝났다.
+	C2S_MOVEMENT_END,
+	S2C_MOVEMENT_END,
+
+	// 다시 시작
+	C2S_RESTART_GAME,
+	S2C_RESTART_GAME,
 
 	// 캐릭터가 어디로 이동하는지 Broadcast
 	S2C_BROADCAST_MOVE,
 
 	PACKETID_END,
-}; 
+};
 
 struct PacketHeader
 {
@@ -75,7 +91,7 @@ struct PacketS2C_Access : PacketHeader
 
 struct PacketC2S_BroadcastMsg : PacketHeader
 {
-	char clientMessage[MAX_LEN];	
+	char clientMessage[MAX_LEN];
 };
 
 struct PacketS2C_BroadcastMsg : PacketHeader
@@ -93,6 +109,31 @@ struct PacketC2S_READY : PacketHeader
 {
 	char clickedReady;
 };
+
+struct PacketC2S_IsAllEnd : PacketHeader
+{
+};
+
+struct PacketS2C_IsAllEnd : PacketHeader
+{
+};
+
+struct PacketC2S_IsAllGoal : PacketHeader
+{
+};
+
+struct PacketS2C_IsAllGoal : PacketHeader
+{
+};
+
+struct PacketC2S_IsAllEnter : PacketHeader
+{
+};
+// 
+struct PacketS2C_IsAllEnter : PacketHeader
+{
+};
+
 // 클라에서 게임 시작 전 모든 클라가 레디상태인지 요청
 struct PacketC2S_IsAllReady : PacketHeader
 {
@@ -100,7 +141,20 @@ struct PacketC2S_IsAllReady : PacketHeader
 // 서버가 클라한테 모두 레디면 true 아니면 false 보내준다.
 struct PacketS2C_IsAllReady : PacketHeader
 {
-	char isReady;
+};
+
+// 클라에서 서버한테 어떤 행동인지 알려주기
+struct PacketC2S_BroadcastAction : PacketHeader
+{
+	char who;
+	char action[4];
+};
+
+// 서버에서 어떤 클라가 어떤 행동인지 브로드캐스트해주기.
+struct PacketS2C_BroadcastAction : PacketHeader
+{
+	char who;
+	char action[4];
 };
 
 struct PacketC2S_SetTurn : PacketHeader
@@ -165,20 +219,27 @@ struct PacketS2C_EndAction : PacketHeader
 	// 게임을 끝
 };
 
-struct PacketC2S_CharacterMove : PacketHeader
+struct PacketC2S_MovementEnd : PacketHeader
 {
-	// 어떤 플레이어
+	// 움직임이 끝났다
 	char who;
-	// 어디로 움직였는지(상, 하, 좌, 우)
-	char direction;
 };
 
-struct PacketS2C_CharacterMove : PacketHeader
+struct PacketS2C_MovementEnd : PacketHeader
 {
-	// 어떤 플레이어
-	char who;
-	// 어디로 움직였는지(상, 하, 좌, 우)
-	char direction;
+	// 움직임이 끝났다.
+};
+
+struct PacketC2S_RestartGame : PacketHeader
+{
+	// 게임 다시 시작
+	char restart; // 0이면 다시 시작 안 함, 1이면 다시 시작
+};
+
+struct PacketS2C_RestartGame : PacketHeader
+{
+	// 게임 다시 시작
+	char restart; // 0이면 다시 시작 안 함, 1이면 다시 시작
 };
 
 #pragma pack (pop)

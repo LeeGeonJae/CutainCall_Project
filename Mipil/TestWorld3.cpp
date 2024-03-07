@@ -8,12 +8,12 @@
 #include "../Engine/CameraComponent.h"
 #include "../Engine/ControllerComponent.h"
 #include "../Engine/FPSCameraController.h"
-#include "../Engine/PlayerTestController.h"
 
 #include "../Engine/RigidStaticComponent.h"
 #include "../Engine/RigidDynamicComponent.h"
 
-#include "../Engine/TestCollisionHandler.h"
+#include "TestPlayerController.h"
+#include "TestCollisionHandler.h"
 
 
 void TestWorld3::Initialize()
@@ -44,14 +44,14 @@ void TestWorld3::Initialize()
 	m_dynamicActor = CreateGameObject<GameObject>("Dynamic_Actor", eObjectType::PLAYER).lock();
 	auto CapsuleRigidBody = m_dynamicActor->CreateComponent<RigidDynamicComponent>("Capsule_Rigidbody");
 	auto CapsuleSceneComponent = m_dynamicActor->CreateComponent<SceneComponent>("Capsule_SceneComponent");
-	CapsuleSceneComponent.lock()->SetLocalPosition({ -50.f, 100.f, 0.f });
+	CapsuleSceneComponent.lock()->SetLocalPosition({ -50.f, 10.f, 0.f });
 	CapsuleSceneComponent.lock()->SetLocalRotation({ 0.f, 0.f, 90.f });
 	m_dynamicActor->SetRootComponent(CapsuleSceneComponent.lock());
 	CapsuleRigidBody.lock()->CreateDynamicRigidBody(RigidBodyComponent::Geometry::Capsule, {5.f, 10.f}, { 0.5f, 0.5f, 0.6f }, 0.2f);
 	CapsuleRigidBody.lock()->SetLockFlags(PxRigidDynamicLockFlag::eLOCK_ANGULAR_X | PxRigidDynamicLockFlag::eLOCK_ANGULAR_Z);
 	CapsuleRigidBody.lock()->AddCollisionHandler<TestCollisionHandler>();
 	controllerComponent = m_dynamicActor->CreateComponent<ControllerComponent>("Test_Player_Controller_Component");
-	controllerComponent.lock()->CreateController<PlayerTestController>();
+	controllerComponent.lock()->CreateController<TestPlayerController>();
 
 	__super::Initialize();
 }

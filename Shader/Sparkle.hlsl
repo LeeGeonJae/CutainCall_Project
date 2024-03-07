@@ -19,8 +19,8 @@ cbuffer cbParticleData : register(b9)
     int ParticleDirection; // 파티클 방향
 };
 
-Texture2D Texture : register(t12);
-Texture1D RandomTex : register(t13);
+Texture2D Texture : register(t20);
+Texture1D RandomTex : register(t21);
 SamplerState samLinear : register(s0);
 
 // 게임 시간과 직접 전달한 offset을 기반으로 랜덤 벡터를 샘플링해준다.

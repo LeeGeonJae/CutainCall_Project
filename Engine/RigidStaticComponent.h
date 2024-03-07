@@ -13,10 +13,14 @@ using namespace physx;
 /// 평면 생성할 땐 CreatePlane 함수 사용
 /// </summary>
 
+class StaticMeshComponent;
+
 class RigidStaticComponent
 	: public RigidBodyComponent, public std::enable_shared_from_this<RigidStaticComponent>
 {
 public:
+	virtual ~RigidStaticComponent();
+
 	PxRigidStatic* GetRigidStatic() { return m_rigidStatic; }
 
 	template<typename CollisionHandlerType>
@@ -32,12 +36,15 @@ public:
 	//staticFriction : 정지 마찰력
 	//dynamicFriction : 운동 마찰력
 	//restitution : 반발 계수
-	PxRigidStatic* CreateStaticRigidBody(Geometry geometryType, const std::vector<float>& geometryArgs, const std::vector<float>& materialArgs, bool isTrigger = false);
+	PxRigidStatic* CreateStaticRigidBody(Geometry geometryType, const std::vector<float>& geometryArgs, const std::vector<float>& materialArgs, const Math::Vector3& offsetTrasnform = { 0.f, 0.f, 0.f }, const Math::Vector3& offsetRotation = { 0.f, 0.f, 0.f }, bool isTrigger = false);
+
+	PxRigidStatic* CreateStaticRigidBodyFromStaticMesh(const StaticMeshComponent* staticMeshComponent, const std::vector<float>& materialArgs);
 
 	void AddTriggerShape(Geometry geometryType, const std::vector<float>& geometryArgs, const Math::Vector3& offsetTrasnform = { 0.f, 0.f, 0.f }, const Math::Vector3& offsetRotation = { 0.f, 0.f, 0.f });
 
 	PxRigidStatic* CreatePlane(float nx, float ny, float nz, float distance, const std::vector<float>& materialArgs);
 
+	PxRigidStatic* CreateHollowBox(float Width, float Height, float Depth, const std::vector<float>& materialArgs);
 
 	virtual void Initialize() override;
 	virtual void Update(float deltaTime) override;
@@ -51,7 +58,7 @@ template<typename CollisionHandlerType>
 inline void RigidStaticComponent::AddCollisionHandler()
 {
 	if (!m_collisionHandler) {
-		m_collisionHandler = PhysicsManager::GetInstance()->GetCollisionHandler(m_rigidStatic);
+		m_collisionHandler = PhysicsManager::GetInstance()->GetCollisionHandler(m_rigidStatic).lock();
 		if (!m_collisionHandler) {
 			m_collisionHandler = std::make_shared<CollisionHandlerType>();
 			PhysicsManager::GetInstance()->AddCollisionHandler(m_rigidStatic, m_collisionHandler);

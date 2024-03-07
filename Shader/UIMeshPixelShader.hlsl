@@ -50,34 +50,6 @@ int querySpecularTextureLevels()
     return levels;
 }
 
-
-float3 ComputePointLight(PS_INPUT Input)
-{
-    float3 normal = normalize(Input.Norm);
-
-     // Light Vector  ->  [obj -> PointLight]
-    float3 toLightVec = normalize(lightPosition.xyz - Input.WorldPos.xyz);
-    float3 reflection = reflect(-toLightVec.xyz, normal);
-       
-    float3 diffuse = saturate(dot(toLightVec.xyz, normal));
-    float3 specualr = saturate(dot(reflection, -normalize(Input.mViewDir)));
-     
-     // 표면으로부터 광원까지 거리
-    float d = distance(lightPosition, Input.WorldPos);
-    
-    if (d > lightRange)
-        return float3(0, 0, 0);
-    
-    // Normalize Light Vector
-    toLightVec /= d;
-    
-    float att = 1.0f / (1 + (linearTerm * d) + (quadraticTerm * d * d)); // * d;
-     
-    float3 FinalColor = att * lightIntensity * (diffuse + specualr);
-    return FinalColor;
-}
-
-
 float4 main(PS_INPUT Input) : SV_Target
 {
     float3 normal = normalize(Input.Norm);
@@ -120,10 +92,10 @@ float4 main(PS_INPUT Input) : SV_Target
     // 현재 Input.mViewDir 는 카메라에서 버텍스 방향.    
     
     // 표면 법선 방향과 나가는 빛 방향 사이의 각도입니다.
-    float cosLo = max(0.0, dot(normal, -Input.mViewDir));
+    float cosLo = max(0.0, dot(normal, -float3(1.f, 0.8f, 1.f)));
     
 	// Specular reflection vector.
-    float3 Lr = 2.0 * cosLo * normal + Input.mViewDir;
+    float3 Lr = 2.0 * cosLo * normal + float3(1.f, 0.8f, 1.f);
 
 	// 수직 입사에서의 프레넬 반사율(금속의 경우 알베도 색상 사용)
     float3 F0 = lerp(Fdielectric, texAlbedo, Metalness);

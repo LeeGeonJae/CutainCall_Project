@@ -68,7 +68,7 @@ public:
 public:
 	void Create(aiMesh* mesh);
 	void CreateBoneWeight(aiMesh* mesh, SkeletonResource* skeleton);
-	void CreateIndexBuffer(UINT* vertices, UINT vertexCount);
+	void CreateIndexBuffer();
 
 	template<typename T>
 	void CreateVertexBuffer(T* vertices, UINT vertexCount, ID3D11Buffer** vertexBuffer);
@@ -77,6 +77,7 @@ public:
 
 	std::vector<BoneWeightVertex>	m_BoneWeightVertices;
 	std::vector<Vertex>				m_Vertices;
+	std::vector<UINT>				m_Indices;
 
 	ComPtr<ID3D11Buffer> m_pBWVertexBuffer;
 	ComPtr<ID3D11Buffer> m_pVertexBuffer;

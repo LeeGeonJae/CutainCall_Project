@@ -15,14 +15,14 @@ SkeletalMeshModel::SkeletalMeshModel()
 SkeletalMeshModel::~SkeletalMeshModel()
 {
 }
- 
+
 void SkeletalMeshModel::SetInstanceMaterial(Material* material, int instanceNumber)
 {
 	m_MeshInstances[instanceNumber].m_pMaterial = material;
 }
 
 bool SkeletalMeshModel::ReadSceneResourceFromFBX(std::string filePath)
-{ 
+{
 	 //FBX 파일 읽기
 	std::shared_ptr<ModelResource> sceneResource = ResourceManager::GetInstance()->CreateModelResource(filePath, ModelType::SKELETAL);
 	if (sceneResource == nullptr)
@@ -46,10 +46,10 @@ void SkeletalMeshModel::SetSceneResource(std::shared_ptr<ModelResource> val)
 	{
 		Mesh* meshResource = &m_ModelResource->m_Meshes[i];
 		Material* material = m_ModelResource->GetMeshMaterial(i);
-		m_MeshInstances[i].Create(meshResource, &m_RootNode, material); 
+		m_MeshInstances[i].Create(meshResource, &m_RootNode, material);
 	}
-	InitBoneAnimationReference(0);	// 각 노드의 애니메이션 정보참조 연결	
-	
+	InitBoneAnimationReference(0);	// 각 노드의 애니메이션 정보참조 연결
+
 	m_BoundingBox.Center = Math::Vector3(m_ModelResource->m_AABBmin + m_ModelResource->m_AABBmax) * 0.5f;	// Calculate extent
 	m_BoundingBox.Extents = Math::Vector3(m_ModelResource->m_AABBmax - m_ModelResource->m_AABBmin);	// Calculate extent
 }
@@ -58,10 +58,15 @@ void SkeletalMeshModel::ChangeBoneAnimationReference(UINT index)
 {
 	assert(index < m_ModelResource->m_Animations.size());
 	auto animation = m_ModelResource->m_Animations[index];
+	*m_isLoop = animation->m_animLoop;
+	*m_pAnimationProgressTime = 0.0f;
+
 	for (size_t i = 0; i < animation->m_NodeAnims.size(); i++)
 	{
 		NodeAnimation& nodeAnimation = animation->m_NodeAnims[i];
 		Bone* pBone = m_RootNode.FindNode(nodeAnimation.m_NodeName);
+		nodeAnimation.m_bIsLoop = m_isLoop;
+
 		assert(pBone != nullptr);
 		pBone->m_pNextNodeAnimation = &animation->m_NodeAnims[i];
 	}
@@ -70,7 +75,7 @@ void SkeletalMeshModel::ChangeBoneAnimationReference(UINT index)
 void SkeletalMeshModel::SettingBindposeMatrix()
 {
 	// 여기에선 애니메이션이 바뀔 경우 안쓸 본의 행렬 초기화 작업.
-	// Setting Bindpose Matrix 
+	// Setting Bindpose Matrix
 	SkeletonResource* pSkeleton = &m_ModelResource->m_Skeleton;
 	for (size_t i = 0; i < pSkeleton->Bones.size(); i++)
 	{
@@ -93,6 +98,7 @@ void SkeletalMeshModel::InitBoneAnimationReference(UINT index)
 	for (size_t i = 0; i < animation->m_NodeAnims.size(); i++)
 	{
 		NodeAnimation& nodeAnimation = animation->m_NodeAnims[i];
+		nodeAnimation.m_bIsLoop = m_isLoop;
 		Bone* pBone = m_RootNode.FindNode(nodeAnimation.m_NodeName);
 		assert(pBone != nullptr);
 		pBone->m_pCurNodeAnimation = &animation->m_NodeAnims[i];
@@ -139,10 +145,10 @@ void SkeletalMeshModel::CreateHierachy(SkeletonResource* skeleton)
 	}
 }
 
-bool SkeletalMeshModel::AddSceneAnimationFromFBX(std::string filePath)
+bool SkeletalMeshModel::AddSceneAnimationFromFBX(std::string filePath, bool animLoop)
 {
 	assert(m_ModelResource);
-	auto animation = ResourceManager::GetInstance()->CreateAnimationResource(filePath);
+	auto animation = ResourceManager::GetInstance()->CreateAnimationResource(filePath, animLoop);
 	if (!animation) {
 		return false;
 	}
@@ -161,4 +167,3 @@ double SkeletalMeshModel::GetAnimationDuration(int animationIdx)
 {
 	return m_ModelResource->m_Animations[animationIdx]->m_Duration;
 }
- 

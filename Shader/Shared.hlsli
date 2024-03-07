@@ -15,14 +15,20 @@ TextureCube txIBL_Specular : register(t9);
 Texture2D txIBL_SpecularBRDF_LUT : register(t10);
 Texture2D txShadowMap : register(t11);
 
+TextureCube txLightIBL_Diffuse : register(t12);
+TextureCube txLightIBL_Specular : register(t13);
+Texture2D txLightIBL_SpecularBRDF_LUT : register(t14);
+
 SamplerState samLinear : register(s0);
 SamplerState samClamp : register(s1);
 
 cbuffer IBL_Buffer : register(b0)
 {
     int UseIBL = false;              // 4 
+    int UseLightIBL = false; // 4 
     float AmbientOcclusion = 1.0f;   // 4
-    float IBL_pad[2];                // 8  ,  16byte
+    int isSkeletal = false; // 4	16
+    Matrix m_TestLocal;
 }
 
 cbuffer BoolBuffer : register(b1)
@@ -40,7 +46,11 @@ cbuffer BoolBuffer : register(b1)
     int UseCubeMap;
     float MetalnessValue = 1.0f;
     float RoughnessValue = 1.0f;
-    int mapPad;
+    int IsGlass;
+    
+    float ValueIBL = 1.0f;
+    float ValueLightIBL = 1.0f;
+    float boolPad[2];
 }
 
 cbuffer TransformW : register(b2)
@@ -61,24 +71,29 @@ cbuffer LightDirBuffer : register(b4)
     float4 vLightDir;
     float4 vLightColor;
     float4 gWorldCameraPosition;
-    float4 pad[1];
+    float4 Lightpad[1];
 }
 
 cbuffer MatrixPalette : register(b5)
 {
-    matrix MatrixPaletteArray[256];
+    matrix MatrixPaletteArray[128];
 }
+
+static const uint pointlightMaxCount = 10;
 
 cbuffer PointLight : register(b6)
 {
-    float4 lightPosition;
-    float lightRange;
-    float linearTerm;
-    float quadraticTerm;
-    float lightIntensity;
+    struct
+    {
+        float4 lightPosition;
+        float lightRange;
+        float linearTerm;
+        float quadraticTerm;
+        float lightIntensity;
     
-    float3 lightColor;
-    float lightPad;
+        float3 lightColor;
+        float lightPad;
+    } pointLights[pointlightMaxCount];
 };
 
 //--------------------------------------------------------------------------------------

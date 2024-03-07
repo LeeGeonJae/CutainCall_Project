@@ -28,7 +28,7 @@ Math::Matrix  NodeAnimation::Evaluate(float progressTime)
 			UINT lastIndex = m_AnimationKey.size() - 1;
 
 			// for animation change
-			if (progressTime > m_AnimationKey[lastIndex].m_Time)
+			if (progressTime > m_AnimationKey[lastIndex].m_Time && *m_bIsLoop == true)
 			{
 				progressTime = (float)fmod(progressTime, m_AnimationKey[lastIndex].m_Time);
 			}
@@ -46,7 +46,7 @@ Math::Matrix  NodeAnimation::Evaluate(float progressTime)
 			rotation = m_AnimationKey[i].m_Rotation;
 			scaling = m_AnimationKey[i].m_Scaling;
 		}
-		else if (i == m_AnimationKey.size())
+		else if (i >= m_AnimationKey.size())
 		{
 			position = m_AnimationKey[i - 1].m_Position;
 			rotation = m_AnimationKey[i - 1].m_Rotation;
@@ -127,6 +127,7 @@ void Animation::Create(const std::string strFBXFilePath, const aiAnimation* pAiA
 	{
 		aiNodeAnim* pAiNodeAnim = pAiAnimation->mChannels[iChannel];
 		NodeAnimation& refNodeAnim = m_NodeAnims[iChannel];
+		refNodeAnim.m_bIsLoop = &m_animLoop;
 		refNodeAnim.Create(pAiNodeAnim, pAiAnimation->mTicksPerSecond);
 	}
 }

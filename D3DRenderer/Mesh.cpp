@@ -26,20 +26,20 @@ void Mesh::Create(aiMesh* mesh)
 		m_Vertices[i].Normal = Vector3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
 		m_Vertices[i].Tangent = Vector3(mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z);
 	}
-	
+
 	CreateVertexBuffer<Vertex>(&m_Vertices[0], (UINT)m_Vertices.size(), m_pVertexBuffer.GetAddressOf());
 
 	// 인덱스 정보 생성
-	unique_ptr<UINT[]> indices(new UINT[mesh->mNumFaces * 3]);
+	m_Indices.resize(mesh->mNumFaces * 3);
 
 	for (UINT i = 0; i < mesh->mNumFaces; ++i)
 	{
-		indices[i * 3 + 0] = mesh->mFaces[i].mIndices[0];
-		indices[i * 3 + 1] = mesh->mFaces[i].mIndices[1];
-		indices[i * 3 + 2] = mesh->mFaces[i].mIndices[2];
+		m_Indices[i * 3 + 0] = mesh->mFaces[i].mIndices[0];
+		m_Indices[i * 3 + 1] = mesh->mFaces[i].mIndices[1];
+		m_Indices[i * 3 + 2] = mesh->mFaces[i].mIndices[2];
 	}
 
-	CreateIndexBuffer(indices.get(), mesh->mNumFaces * 3);
+	CreateIndexBuffer();
 }
 
 void Mesh::CreateBoneWeight(aiMesh* mesh, SkeletonResource* skeleton)
@@ -91,31 +91,31 @@ void Mesh::CreateBoneWeight(aiMesh* mesh, SkeletonResource* skeleton)
 
 	//=======================================================//
 	// 인덱스 정보 생성
-	unique_ptr<UINT[]> indices(new UINT[mesh->mNumFaces * 3]);
+	m_Indices.resize(mesh->mNumFaces * 3);
 
 	for (UINT i = 0; i < mesh->mNumFaces; ++i)
 	{
-		indices[i * 3 + 0] = mesh->mFaces[i].mIndices[0];
-		indices[i * 3 + 1] = mesh->mFaces[i].mIndices[1];
-		indices[i * 3 + 2] = mesh->mFaces[i].mIndices[2];
+		m_Indices[i * 3 + 0] = mesh->mFaces[i].mIndices[0];
+		m_Indices[i * 3 + 1] = mesh->mFaces[i].mIndices[1];
+		m_Indices[i * 3 + 2] = mesh->mFaces[i].mIndices[2];
 	}
 
-	CreateIndexBuffer(indices.get(), mesh->mNumFaces * 3);
+	CreateIndexBuffer();
 }
 
-void Mesh::CreateIndexBuffer(UINT* vertices, UINT vertexCount)
+void Mesh::CreateIndexBuffer()
 {
 	/// CreateIndexBuffer  ///
 	// 인덱스 개수 저장.
-	m_IndexCount = vertexCount;
+	m_IndexCount = m_Indices.size();
 
 	D3D11_BUFFER_DESC indexBD = {};
-	indexBD.ByteWidth = sizeof(UINT) * vertexCount;
+	indexBD.ByteWidth = sizeof(UINT) * m_IndexCount;
 	indexBD.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	indexBD.Usage = D3D11_USAGE_DEFAULT;
 	indexBD.CPUAccessFlags = 0;
 
 	D3D11_SUBRESOURCE_DATA ibData = {};
-	ibData.pSysMem = vertices;
+	ibData.pSysMem = m_Indices.data();
 	HR_T(D3DRenderManager::m_pDevice->CreateBuffer(&indexBD, &ibData, m_pIndexBuffer.GetAddressOf()));
 }

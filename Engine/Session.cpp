@@ -36,7 +36,6 @@ void Session::Read(char* pData)
 		m_recvQueue.push({ packet, sizeInfo });
 		m_recvBytes -= sizeInfo;
 		memmove(m_recvBuffer, m_recvBuffer + sizeInfo, RCV_BUF_SIZE);
-		printf("readBuffer: %s \n", m_recvBuffer);
 
 		if (m_recvBytes <= 0)
 			break;
@@ -66,6 +65,22 @@ void Session::SetClient(std::shared_ptr<ClientNetworkManager> pClient)
 	m_pPeerClient = pClient;
 
 	m_pPeerClient->SetSessionId(m_sessionId);
+}
+
+void Session::SetMovementFalse()
+{
+	for (short i = 0; i < 2; i++)
+		m_movement[i] = false;
+}
+
+bool Session::GetAllMovementEnd()
+{
+	for (short i = 0; i < 2; i++)
+	{
+		if (!m_movement[i]) 
+			return false;
+	}
+	return true;
 }
 
 int Session::Send(char* packet, int len)

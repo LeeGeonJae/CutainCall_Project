@@ -15,12 +15,14 @@ public:
 public:
 	Material* GetMaterial(UINT index);
 	double GetAnimationDuration(int animationIdx);
+	void SetIsOutLine(bool isOutLine) { m_IsOutLine = isOutLine; }
+	void SetIsMove(bool isMove) { m_IsUIMove = isMove; }
 	void SetWorldMatrix(Math::Matrix* worldMatrix) { m_worldMatrix = worldMatrix; }
 	void SetAnimationTime(float* progressTime) { m_pAnimationProgressTime = progressTime; }
 	void SetInstanceMaterial(Material* material, int instanceNumber);
 
 	bool ReadSceneResourceFromFBX(std::string filePath);
-	bool AddSceneAnimationFromFBX(std::string filePath);
+	bool AddSceneAnimationFromFBX(std::string filePath, bool isLoop);
 	void PlayAnimation(UINT index);
 	void UpdateBoneNode(float deltaTime);
 	void ChangeBoneAnimationReference(UINT index);
@@ -35,10 +37,14 @@ private:
 
 public:
 	bool m_IsCulled = true;
+	bool m_IsOutLine = false;
+	bool m_IsUIMove = false;
+	bool* m_isLoop;
 
 	Bone m_RootNode;
 	float* m_pAnimationProgressTime = nullptr;
 	Math::Matrix* m_worldMatrix = nullptr;	// meshComponentÀÇ matrix ÂüÁ¶
+
 	BoundingBox m_BoundingBox;
 
 	std::shared_ptr<ModelResource>  m_ModelResource;

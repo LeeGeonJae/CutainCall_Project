@@ -54,6 +54,18 @@ void FPSCameraController::HandleInput(const Keyboard::State& KeyState, const Key
 		Math::Vector3 delta = Math::Vector3(float(MouseState.x), float(MouseState.y), 0.f) * m_rotationSpeed;
 		AddPitch(delta.y);
 		AddYaw(delta.x);
+
+		//// 원하는 물체를 향하도록 카메라의 방향을 설정
+		//Math::Vector3 TargetVec = { 0,0,0 };
+		//DirectX::XMVECTOR forward = DirectX::XMVectorSubtract(TargetVec, m_owner.lock()->GetLocalPosition());
+
+		//// 필요에 따라 카메라의 업 벡터를 설정하여 원하는 방향으로 회전
+		//DirectX::XMVECTOR up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f); // 예시: y축이 위쪽이라고 가정
+		//DirectX::XMVECTOR right = DirectX::XMVector3Cross(up, forward);
+		//up = DirectX::XMVector3Cross(forward, right);
+
+		//// 카메라 행렬 생성
+		//DirectX::XMMATRIX viewMatrix = DirectX::XMMatrixLookToLH(m_owner.lock()->GetLocalPosition(), forward, up);
 	}
 }
 
@@ -63,9 +75,10 @@ void FPSCameraController::Update(float deltaTime)
 
 	if (m_InputVector.Length() > 0.0f)
 	{
-		owner->SetPosition(owner->GetPosition() + (m_InputVector * m_movementSpeed * deltaTime));
+		owner->SetPosition(owner->GetLocalPosition() + (m_InputVector * m_movementSpeed * deltaTime));
 		m_InputVector = Math::Vector3::Zero;
 	}
+
 	owner->SetRotation(Math::Vector3(XMConvertToDegrees(m_pitch), XMConvertToDegrees(m_yaw), 0.0f));
 }
 
@@ -99,4 +112,9 @@ void FPSCameraController::AddYaw(const float value)
 	{
 		m_yaw += XM_2PI;
 	}
+}
+
+void FPSCameraController::SetLookTarget(bool isLookTarget)
+{
+	m_bIsLookTarget = isLookTarget;
 }

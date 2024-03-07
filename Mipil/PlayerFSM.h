@@ -4,6 +4,7 @@
 
 #include "PlayerState.h"
 
+class PlayerObject;
 class TestPlayerObject;
 
 class PlayerFSM
@@ -13,9 +14,13 @@ public:
 	PlayerFSM();
 
 
-	TestPlayerObject* GetOwnerObject() const { return m_pOwner; }
+	PlayerObject* GetOwnerObject() const { return m_pOwner; }
+	TestPlayerObject* GetTestOwnerObject() const { return m_pOwnerTest; }
 
-	void SetOwnerObject(TestPlayerObject* player) { m_pOwner = player; }
+	void SetOwnerObject(PlayerObject* player);
+	void SetOwnerObject(TestPlayerObject* player);
+
+	bool IsIdleState();
 
 
 private:
@@ -28,6 +33,7 @@ private:
 	State_Crash m_crash;
 	State_GetItem m_getItem;
 
-	TestPlayerObject* m_pOwner;
+	PlayerObject* m_pOwner;
+	TestPlayerObject* m_pOwnerTest;
 };
 

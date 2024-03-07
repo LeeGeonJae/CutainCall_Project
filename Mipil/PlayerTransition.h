@@ -15,7 +15,15 @@ public:
 	std::string operator()() override abstract;
 	void HandleEvent(Event* event) final;
 
+	void SetOwnerPlayer(bool isHostPlayer);
+
 	bool IsMoveState(Vector3 vec);
+
+	void SetPreStateForAll(std::string preState);
+	void InitCrashForAll();
+	void InitGetItemForAll();
+
+	bool m_bHostPlayers = false;
 
 	bool m_bTurn = false;
 	Vector3 m_action = {0.f, 0.f, 0.f};
@@ -35,7 +43,10 @@ public:
 	std::string operator()() final
 	{
 		if (m_bTurn && m_action == grid::STAY)
+		{
+			m_bTurn = false;
 			return "State_TurnWait";
+		}
 
 		return "";
 	}
@@ -48,7 +59,11 @@ public:
 	std::string operator()() final
 	{
 		if (m_bTurn && IsMoveState(m_action))
+		{
+			m_bTurn = false;
+			m_action = grid::STAY;
 			return "State_TurnMove";
+		}
 
 		return "";
 	}
@@ -61,7 +76,11 @@ public:
 	std::string operator()() final
 	{
 		if (m_bTurn && m_action == grid::Y_UP)
+		{
+			m_bTurn = false;
+			m_action = grid::STAY;
 			return "State_TurnUp";
+		}
 
 		return "";
 	}
@@ -76,7 +95,11 @@ public:
 	std::string operator()() final
 	{
 		if (m_bTurn && IsMoveState(m_action))
+		{
+			m_bTurn = false;
+			m_action = grid::STAY;
 			return "State_TurnMove";
+		}
 
 		return "";
 	}
@@ -89,7 +112,11 @@ public:
 	std::string operator()() final
 	{
 		if (m_bTurn && m_action == grid::Y_UP)
+		{
+			m_bTurn = false;
+			m_action = grid::STAY;
 			return "State_TurnUp";
+		}
 
 		return "";
 	}
@@ -102,7 +129,10 @@ public:
 	std::string operator()() final
 	{
 		if (m_bTurn && m_action == grid::STAY && m_bGround)
+		{
+			m_bTurn = false;
 			return "State_TurnWait";
+		}
 
 		return "";
 	}
@@ -115,7 +145,10 @@ public:
 	std::string operator()() final
 	{
 		if (m_bTurn && m_action == grid::STAY && !m_bGround)
+		{
+			m_bTurn = false;
 			return "State_TurnFloating";
+		}
 
 		return "";
 	}
@@ -159,8 +192,8 @@ public:
 	{
 		if(m_bOnCrash)
 		{
-			m_bOnCrash = false;
-			m_preState = "State_TurnMove";
+			InitCrashForAll();
+			SetPreStateForAll("State_TurnMove");
 			return "State_Crash";
 		}
 
@@ -176,8 +209,8 @@ public:
 	{
 		if (m_bOnGetItem)
 		{
-			m_bOnGetItem = false;
-			m_preState = "State_TurnMove";
+			InitGetItemForAll();
+			SetPreStateForAll("State_TurnMove");
 			return "State_GetItem";
 		}
 
@@ -221,8 +254,8 @@ public:
 	{
 		if (m_bOnCrash)
 		{
-			m_bOnCrash = false;
-			m_preState = "State_TurnUp";
+			InitCrashForAll();
+			SetPreStateForAll("State_TurnUp");
 			return "State_Crash";
 		}
 
@@ -238,8 +271,8 @@ public:
 	{
 		if (m_bOnGetItem)
 		{
-			m_bOnGetItem = false;
-			m_preState = "State_TurnUp";
+			InitGetItemForAll();
+			SetPreStateForAll("State_TurnUp");
 			return "State_GetItem";
 		}
 
@@ -272,7 +305,7 @@ public:
 	{
 		if (m_preState == "State_TurnMove")
 		{
-			m_preState = "";
+			SetPreStateForAll("");
 			return "State_TurnMove";
 		}
 
@@ -288,7 +321,7 @@ public:
 	{
 		if (m_preState == "State_TurnUp")
 		{
-			m_preState = "";
+			SetPreStateForAll("");
 			return "State_TurnUp";
 		}
 
@@ -306,7 +339,7 @@ public:
 	{
 		if (m_preState == "State_TurnMove")
 		{
-			m_preState = "";
+			SetPreStateForAll("");
 			return "State_TurnMove";
 		}
 
@@ -322,7 +355,7 @@ public:
 	{
 		if (m_preState == "State_TurnUp")
 		{
-			m_preState = "";
+			SetPreStateForAll("");
 			return "State_TurnUp";
 		}
 

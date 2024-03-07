@@ -18,24 +18,42 @@ PhysicsManager::~PhysicsManager()
 {
 }
 
-void PhysicsManager::AddRigidDynamicComponent(std::shared_ptr<RigidDynamicComponent> rigidComponents)
+void PhysicsManager::AddRigidDynamicComponent(RigidDynamicComponent* rigidComponents)
 {
 	m_rigidDynamicComponents.push_back(rigidComponents);
 }
 
-void PhysicsManager::RemoveRigidDynamicComponent(std::shared_ptr<RigidDynamicComponent> rigidComponents)
+void PhysicsManager::RemoveRigidDynamicComponent(RigidDynamicComponent* rigidComponents)
 {
 	m_rigidDynamicComponents.remove(rigidComponents);
 }
 
-void PhysicsManager::AddRigidStaticComponent(std::shared_ptr<RigidStaticComponent> rigidComponents)
+void PhysicsManager::AddRigidStaticComponent(RigidStaticComponent* rigidComponents)
 {
 	m_rigidStaticComponents.push_back(rigidComponents);
 }
 
-void PhysicsManager::RemoveRigidStaticComponent(std::shared_ptr<RigidStaticComponent> rigidComponents)
+void PhysicsManager::RemoveRigidStaticComponent(RigidStaticComponent* rigidComponents)
 {
 	m_rigidStaticComponents.remove(rigidComponents);
+}
+
+void PhysicsManager::RemoveCollisionHandler(physx::PxActor* actor)
+{
+	auto it = m_collisionHandlers.find(actor);
+	if (it != m_collisionHandlers.end())
+	{
+		m_collisionHandlers.erase(it);
+	}
+}
+
+void PhysicsManager::RemoveCollisionOwner(physx::PxActor* actor)
+{
+	auto it = m_collisionOwner.find(actor);
+	if (it != m_collisionOwner.end())
+	{
+		m_collisionOwner.erase(it);
+	}
 }
 
 std::weak_ptr<CollisionHandler> PhysicsManager::GetCollisionHandler(physx::PxActor* actor)
@@ -67,7 +85,8 @@ void PhysicsManager::Initailize()
 	m_physics = PxCreatePhysics(PX_PHYSICS_VERSION, *m_foundation, PxTolerancesScale(), true, m_pvd);
 
 	PxSceneDesc sceneDesc(m_physics->getTolerancesScale());
-	sceneDesc.gravity = PxVec3(0.0f, -9.81f, 0.0f);
+	//sceneDesc.gravity = PxVec3(0.0f, -9.81f, 0.0f);
+	sceneDesc.gravity = PxVec3(0.0f, .0f, 0.0f);
 	m_dispatcher = PxDefaultCpuDispatcherCreate(2);
 	sceneDesc.cpuDispatcher = m_dispatcher;
 	//sceneDesc.filterShader = PxDefaultSimulationFilterShader;
@@ -78,14 +97,14 @@ void PhysicsManager::Initailize()
 
 	//DebugVisualization
 #ifdef _DEBUG
-	m_scene->setVisualizationParameter(PxVisualizationParameter::eSCALE, 10.0f);
+	m_scene->setVisualizationParameter(PxVisualizationParameter::eSCALE, 1.0f);
 	m_scene->setVisualizationParameter(PxVisualizationParameter::eWORLD_AXES, INT_MAX);
-	m_scene->setVisualizationParameter(PxVisualizationParameter::eBODY_AXES, 1.0f);
-	m_scene->setVisualizationParameter(PxVisualizationParameter::eBODY_MASS_AXES, 1.0f);
+	//m_scene->setVisualizationParameter(PxVisualizationParameter::eBODY_AXES, 1.0f);
+	//m_scene->setVisualizationParameter(PxVisualizationParameter::eBODY_MASS_AXES, 1.0f);
 	m_scene->setVisualizationParameter(PxVisualizationParameter::eBODY_LIN_VELOCITY, .1f);
 	m_scene->setVisualizationParameter(PxVisualizationParameter::eCOLLISION_SHAPES, 1.0f);
-	m_scene->setVisualizationParameter(PxVisualizationParameter::eCOLLISION_STATIC, 1.0f);
-	m_scene->setVisualizationParameter(PxVisualizationParameter::eCOLLISION_DYNAMIC, 1.0f);
+	//m_scene->setVisualizationParameter(PxVisualizationParameter::eCOLLISION_STATIC, 1.0f);
+	//m_scene->setVisualizationParameter(PxVisualizationParameter::eCOLLISION_DYNAMIC, 1.0f);
 	//m_scene->setVisualizationCullingBox(PxBounds3({ -1000, -400, -1000 }, { 1000, 400, 1000 }));
 #endif
 	//PxPvdSceneClient* pvdClient = m_scene->getScenePvdClient();
@@ -108,6 +127,11 @@ void PhysicsManager::Finalize()
 		PX_RELEASE(transport);
 	}
 	PX_RELEASE(m_foundation);
+
+	m_rigidDynamicComponents.clear();
+	m_rigidStaticComponents.clear();
+	m_collisionHandlers.clear();
+	m_collisionOwner.clear();
 
 	delete m_pInstance;
 }

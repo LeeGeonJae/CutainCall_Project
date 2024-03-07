@@ -40,9 +40,6 @@
     <Filter Include="02. Resource\ModelResource">
       <UniqueIdentifier>{461c3517-1d05-4d6a-98d9-ec9ed68e4267}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02. Resource\SkeletonResource">
-      <UniqueIdentifier>{f4c4f2f7-3483-4df1-ae6a-fe8de61e6b09}</UniqueIdentifier>
-    </Filter>
     <Filter Include="02. Resource\Shader">
       <UniqueIdentifier>{320a8f09-7a36-491d-84f8-369cd2bc1897}</UniqueIdentifier>
     </Filter>
@@ -73,6 +70,9 @@
     <Filter Include="98. ParticleShader">
       <UniqueIdentifier>{fe496552-1d49-474c-be0f-5549024b2488}</UniqueIdentifier>
     </Filter>
+    <Filter Include="02. Resource\Shader\SkeletonResource">
+      <UniqueIdentifier>{f4c4f2f7-3483-4df1-ae6a-fe8de61e6b09}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -100,7 +100,7 @@
       <Filter>02. Resource\ModelResource</Filter>
     </ClInclude>
     <ClInclude Include="SkeletonResource.h">
-      <Filter>02. Resource\SkeletonResource</Filter>
+      <Filter>02. Resource\Shader\SkeletonResource</Filter>
     </ClInclude>
     <ClInclude Include="Graphics.h">
       <Filter>01. Manager\D3DRendererManager\Graphics</Filter>
@@ -157,6 +157,9 @@
     <ClInclude Include="EnvironmentModel.h">
       <Filter>04. Model</Filter>
     </ClInclude>
+    <ClInclude Include="PointLightInstance.h">
+      <Filter>03. Instance</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -181,7 +184,7 @@
       <Filter>02. Resource\ModelResource</Filter>
     </ClCompile>
     <ClCompile Include="SkeletonResource.cpp">
-      <Filter>02. Resource\SkeletonResource</Filter>
+      <Filter>02. Resource\Shader\SkeletonResource</Filter>
     </ClCompile>
     <ClCompile Include="Graphics.cpp">
       <Filter>01. Manager\D3DRendererManager\Graphics</Filter>
@@ -238,6 +241,9 @@
     <ClCompile Include="EnvironmentModel.cpp">
       <Filter>04. Model</Filter>
     </ClCompile>
+    <ClCompile Include="PointLightInstance.cpp">
+      <Filter>03. Instance</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Shader\BasicPixelShader.hlsl">
@@ -264,12 +270,6 @@
     <FxCompile Include="..\Shader\VS_Environment.hlsl">
       <Filter>99. Shader</Filter>
     </FxCompile>
-    <FxCompile Include="Outline_VS.hlsl">
-      <Filter>99. Shader</Filter>
-    </FxCompile>
-    <FxCompile Include="Outline_PS.hlsl">
-      <Filter>99. Shader</Filter>
-    </FxCompile>
     <FxCompile Include="..\Shader\Fire.hlsl">
       <Filter>98. ParticleShader</Filter>
     </FxCompile>
@@ -287,6 +287,24 @@
     </FxCompile>
     <FxCompile Include="..\Shader\Sparkle.hlsl">
       <Filter>98. ParticleShader</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Shader\SkeletalOutLine_Depth_VS.hlsl">
+      <Filter>99. Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Shader\SkeletalOverOutLine_Depth_VS.hlsl">
+      <Filter>99. Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Shader\StaticOutLine_Depth_VS.hlsl">
+      <Filter>99. Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Shader\StaticOverOutLine_Depth_VS.hlsl">
+      <Filter>99. Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Shader\FinalRender_Shader.hlsl">
+      <Filter>99. Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Shader\UIMesh_Shader.hlsl">
+      <Filter>99. Shader</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

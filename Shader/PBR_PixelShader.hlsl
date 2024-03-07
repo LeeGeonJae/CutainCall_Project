@@ -50,34 +50,6 @@ uint querySpecularTextureLevels()
     return levels;
 }
 
-
-float3 ComputePointLight(PS_INPUT Input)
-{
-    float3 normal = normalize(Input.Norm);
-
-     // Light Vector  ->  [obj -> PointLight]
-    float3 toLightVec = normalize(lightPosition.xyz - Input.WorldPos.xyz);
-    float3 reflection = reflect(-toLightVec.xyz, normal);
-       
-    float3 diffuse = saturate(dot(toLightVec.xyz, normal));
-    float3 specualr = saturate(dot(reflection, -normalize(Input.mViewDir)));
-     
-     // 표면으로부터 광원까지 거리
-    float d = distance(lightPosition, Input.WorldPos);
-    
-    if (d > lightRange)
-        return float3(0, 0, 0);
-    
-    // Normalize Light Vector
-    toLightVec /= d;
-    
-    float att = 1.0f / (1 + (linearTerm * d) + (quadraticTerm * d * d)); // * d;
-     
-    float3 FinalColor = att * lightIntensity * (diffuse + specualr);
-    return FinalColor;
-}
-
-
 float4 main(PS_INPUT Input) : SV_Target
 {
     float3 normal = normalize(Input.Norm);
@@ -100,9 +72,20 @@ float4 main(PS_INPUT Input) : SV_Target
         texAlbedo.rgb = pow(texAlbedo.rgb, 2.2f); // gamma
     
     float Metalness = 0.0f;
-    float Roughness = Epsilon;
+    float Roughness = 1.f;
+
     float Opacity = 1.0f;
     float3 Emissive = 0.0f;
+    
+    
+    if (isSkeletal)
+    {
+        Roughness = Epsilon; // skeletal
+    }
+    else
+    {
+        Roughness = 1.0f; // static
+    }
     
     if (UseEmissiveMap)
         Emissive = txEmissive.Sample(samLinear, Input.Tex).rgb;
@@ -156,46 +139,40 @@ float4 main(PS_INPUT Input) : SV_Target
         
     // --------------------------------------------------------------------------
     //? IBL
-    //
     
     float3 ambientLighting = 0;
-
     if (UseIBL)
     {
-        // Sample diffuse irradiance at normal direction.
-		// 표면이 받는 반구의 여러 방향에서 오는 간접광을 샘플링한다. Lambertian BRDF를 가정하여 포함되어 있다.
         float3 irradiance = txIBL_Diffuse.Sample(samLinear, normal).rgb;
 
-		// Calculate Fresnel term for ambient lighting.
-		// Since we use pre-filtered cubemap(s) and irradiance is coming from many directions 
-		// use cosLo instead of angle with light's half-vector (cosLh above).
-		// See: https://seblagarde.wordpress.com/2011/08/17/hello-world/
-		// 비스듬이 보는정도, cos값은 빛 방향을 특정할수 없는 반구의 여러 방향에서 오는 간접광이므로 
-		// dot(Half,View)를 사용하지않고  dot(Normal,View)을 사용한다.
         float3 F = fresnelSchlick(F0, cosLo);
-
-		// Get diffuse contribution factor (as with direct lighting).
-		// 표면산란 비율을 구한다.
         float3 kd = lerp(1.0 - F, 0.0, Metalness);
-
-		// Irradiance map contains exitant radiance assuming Lambertian BRDF, no need to scale by 1/PI here either.
-		// txIBL_Diffuse 맵에는 Lambertian BRDF를 가정하여 포함되어 있으므로 PI로 나눌필요가 없다.
         float3 diffuseIBL = kd * texAlbedo * irradiance; // IBL의 diffuse 항
-
-		// Sample pre-filtered specular reflection environment at correct mipmap level.
         uint specularTextureLevels = querySpecularTextureLevels(); // 전체 LOD 밉맵 레벨수 
-		// View,Normal 반사벡터를 사용하여 샘플링한다. 거칠기에 따라 뭉게진 반사빛을 표현하기위해  LOD 보간이 적용된다. 
+
         float3 specularIrradiance = txIBL_Specular.SampleLevel(samLinear, Lr, Roughness * specularTextureLevels).rgb;
-
-		// Split-sum approximation factors for Cook-Torrance specular BRDF.
-		// dot(Normal,View) , roughness를 텍셀좌표로 샘플링하여 미리계산된 x,y값을 가저온다.
         float2 specularBRDF = txIBL_SpecularBRDF_LUT.Sample(samClamp, float2(cosLo, Roughness)).rg;
-
-		// Total specular IBL contribution.
         float3 specularIBL = (F0 * specularBRDF.x + specularBRDF.y) * specularIrradiance;
 
-		// Total ambient lighting contribution.
         ambientLighting = (diffuseIBL + specularIBL) * AmbientOcclusion;
+    }
+    
+    float3 pointAmbientLighting = 0;
+    if (UseLightIBL)
+    {
+        float3 rotMatrix = mul(normal, (float3x3) m_TestLocal);
+        float3 irradiance = txLightIBL_Diffuse.Sample(samLinear, rotMatrix).rgb;
+        
+        float3 F = fresnelSchlick(F0, cosLo);
+        float3 kd = lerp(1.0 - F, 0.0, Metalness);
+        float3 diffuseIBL = kd * texAlbedo * irradiance; // IBL의 diffuse 항
+        uint specularTextureLevels = querySpecularTextureLevels(); // 전체 LOD 밉맵 레벨수 
+
+        float3 specularIrradiance = txLightIBL_Specular.SampleLevel(samLinear, Lr,specularTextureLevels).rgb;
+        float2 specularBRDF = txLightIBL_SpecularBRDF_LUT.Sample(samClamp, float2(cosLo, Roughness)).rg;
+        float3 specularIBL = (F0 * specularBRDF.x + specularBRDF.y) * specularIrradiance;
+
+        pointAmbientLighting = (diffuseIBL + specularIBL) * AmbientOcclusion;
     }
     
     // 그림자 처리 부분
@@ -217,8 +194,32 @@ float4 main(PS_INPUT Input) : SV_Target
         }
     }
     
-    //float3 final = directLighting + ambientLighting + Emissive;
-    float3 final = directLighting + ambientLighting + Emissive;
+    float3 pointLighting = float3(0, 0, 0);
+    
+    for (uint i = 0; i < pointlightMaxCount; ++i)
+    {
+        float3 normal = normalize(Input.Norm);
+
+     // Light Vector  ->  [obj -> PointLight]
+        float3 toLightVec = normalize(pointLights[i].lightPosition.xyz - Input.WorldPos.xyz);
+        float3 reflection = reflect(-toLightVec.xyz, normal);
+       
+        float3 diffuse = saturate(dot(toLightVec.xyz, normal));
+        float3 specualr = saturate(dot(reflection, -normalize(Input.mViewDir)));
+     
+     // 표면으로부터 광원까지 거리
+        float d = distance(pointLights[i].lightPosition, Input.WorldPos);
+    
+        if (d <= pointLights[i].lightRange)
+        {
+            toLightVec /= d;
+            float att = 1.0f / (1 + (pointLights[i].linearTerm * d) + (pointLights[i].quadraticTerm * d * d));
+         
+            pointLighting += att * pointLights[i].lightIntensity * (diffuse + specualr) * pointLights[i].lightColor;
+        }
+    }
+    
+    float3 final = directLighting + ambientLighting * ValueIBL + pointAmbientLighting * ValueLightIBL + pointLighting + Emissive;
     float4 finalColor = float4(final, Opacity);
     
     if (UseGamma)

@@ -9,6 +9,7 @@ public:
 	~SoundManager();
 
 	FMOD::Sound* LoadSound(std::string filePath, FMOD_MODE mode = FMOD_DEFAULT);
+	void StopAllSound();
 
 	void PlaySound(FMOD::Sound* sound);
 	void PlaySound(std::string filePath);

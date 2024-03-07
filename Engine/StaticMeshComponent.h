@@ -19,6 +19,9 @@ public:
 
 	// CreateComponent 후 필수적으로 filePath 설정
 	void SetFilePath(std::string_view filePath) { m_filePath = filePath; }
+	void SetOutLine(bool isOutLine);
+
+	Math::Vector3 GetModelDimensions() const;
 
 public:
 	void Initialize() override;	// staticMeshModel을 렌더러를 통해 생성, 받아온다.

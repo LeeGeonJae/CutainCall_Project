@@ -86,12 +86,12 @@ void ParticleSystem::textureSetting(ComPtr<ID3D11DeviceContext> deviceContext)
 	auto texture = ResourceManager::GetInstance()->CreateTextureResource(m_TexturePath.c_str());
 
 	// 리소스 및 파이프라인 세팅
-	deviceContext->VSSetShaderResources(12, 1, texture->GetTexture().GetAddressOf());
-	deviceContext->VSSetShaderResources(13, 1, m_RandomTexture.GetAddressOf());
-	deviceContext->GSSetShaderResources(12, 1, texture->GetTexture().GetAddressOf());
-	deviceContext->GSSetShaderResources(13, 1, m_RandomTexture.GetAddressOf());
-	deviceContext->PSSetShaderResources(12, 1, texture->GetTexture().GetAddressOf());
-	deviceContext->PSSetShaderResources(13, 1, m_RandomTexture.GetAddressOf());
+	deviceContext->VSSetShaderResources(20, 1, texture->GetTexture().GetAddressOf());
+	deviceContext->VSSetShaderResources(21, 1, m_RandomTexture.GetAddressOf());
+	deviceContext->GSSetShaderResources(20, 1, texture->GetTexture().GetAddressOf());
+	deviceContext->GSSetShaderResources(21, 1, m_RandomTexture.GetAddressOf());
+	deviceContext->PSSetShaderResources(20, 1, texture->GetTexture().GetAddressOf());
+	deviceContext->PSSetShaderResources(21, 1, m_RandomTexture.GetAddressOf());
 }
 
 void ParticleSystem::streamOutPipeLineSetting(ComPtr<ID3D11DeviceContext> deviceContext, weak_ptr<PipeLine> pipeLine)
@@ -107,9 +107,9 @@ void ParticleSystem::streamOutPipeLineSetting(ComPtr<ID3D11DeviceContext> device
 
 	// 스트림 아웃으로 정점 생성/삭제
 	shader->StreamOutShaderSetting(deviceContext.Get());
-	deviceContext->SOSetTargets(1					// 묶을 정점 갯수, 최대 4개
-		, m_StreamOutVertexBuffer.GetAddressOf()	// 출력용 버퍼
-		, &m_Offset);									// 정점 버퍼마다 기록하기 시작할 위치를 나타냄, 현재 0
+	deviceContext->SOSetTargets(1							// 묶을 정점 갯수, 최대 4개
+		, m_StreamOutVertexBuffer.GetAddressOf()			// 출력용 버퍼
+		, &m_Offset);										// 정점 버퍼마다 기록하기 시작할 위치를 나타냄, 현재 0
 
 	// 바인딩
 	// 처음 그릴 땐 초기화 버퍼로 그린다. 아니면 그냥 그리기용 버퍼 사용.

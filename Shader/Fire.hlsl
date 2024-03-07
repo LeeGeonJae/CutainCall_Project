@@ -19,8 +19,8 @@ cbuffer cbParticleData : register(b9)
     int ParticleDirection;  // 파티클 방향
 };
 
-Texture2D Texture : register(t12);
-Texture1D RandomTex : register(t13);
+Texture2D Texture : register(t20);
+Texture1D RandomTex : register(t21);
 SamplerState samLinear : register(s0);
 
 // 게임 시간과 직접 전달한 offset을 기반으로 랜덤 벡터를 샘플링해준다.
@@ -141,13 +141,37 @@ struct GeoOut
 void DrawGS(point VertexOut gin[1],
 	inout TriangleStream<GeoOut> triStream)
 {
-    float2 gQuadTexC[4] =
+    float2 gQuadTexC[4];
+    
+    if (ParticleDirection == 0)             // 오른쪽
     {
-        float2(1.0f, 0.0f),
-		float2(1.0f, 1.0f),
-		float2(0.0f, 0.0f),
-		float2(0.0f, 1.0f)
-    };
+        gQuadTexC[0] = float2(0.0f, 1.0f);
+        gQuadTexC[1] = float2(1.0f, 1.0f);
+        gQuadTexC[2] = float2(0.0f, 0.0f);
+        gQuadTexC[3] = float2(1.0f, 0.0f);
+    }
+    if (ParticleDirection == 1)             // 왼쪽
+    {
+        gQuadTexC[0] = float2(1.0f, 0.0f);
+        gQuadTexC[1] = float2(0.0f, 0.0f);
+        gQuadTexC[2] = float2(1.0f, 1.0f);
+        gQuadTexC[3] = float2(0.0f, 1.0f);
+    }
+    if (ParticleDirection == 2)             // 아래쪽
+    {
+        gQuadTexC[0] = float2(1.0f, 0.0f);
+        gQuadTexC[1] = float2(1.0f, 1.0f);
+        gQuadTexC[2] = float2(0.0f, 0.0f);
+        gQuadTexC[3] = float2(0.0f, 1.0f);
+    }
+    if (ParticleDirection == 3)             // 위쪽
+    {
+        gQuadTexC[0] = float2(0.0f, 1.0f);
+        gQuadTexC[1] = float2(0.0f, 0.0f);
+        gQuadTexC[2] = float2(1.0f, 1.0f);
+        gQuadTexC[3] = float2(1.0f, 0.0f);
+    }
+
 	
     if (gin[0].Type != PT_EMITTER)
     {

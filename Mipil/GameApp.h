@@ -19,14 +19,6 @@ class TestWorld;
 class GameApp
 	: public CommonApp
 {
-	///Test
-private:
-	// Todo: 채원 : Test
-	//ServerNetworkManager m_server;
-	//ClientNetworkManager m_client;
-	//// 실행파라미터로 받은 ip 주소
-	//char* m_pIPAdd;
-
 public:
 	GameApp(HINSTANCE hInstance);
 	~GameApp() = default;

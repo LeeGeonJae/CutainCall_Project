@@ -140,6 +140,7 @@ int WinSock::Send(char* buf, int len)
         buf[sendLen] = '\0';
     }
 
+
     m_error = ::WSAGetLastError();
 
     if (sendLen == SOCKET_ERROR && m_error != WSAEWOULDBLOCK)
